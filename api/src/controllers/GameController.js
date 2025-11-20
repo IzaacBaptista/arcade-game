@@ -14,13 +14,38 @@ module.exports = {
   },
 
   upgradeTower(req, res) {
-    const message = GameEngine.upgradeTower(Number(req.params.id));
-    return res.json({ msg: message, state: GameEngine.status() });
+    const result = GameEngine.upgradeTower(Number(req.params.id));
+    return res.json(result);
   },
 
   trainTroops(req, res) {
     const { type, amount } = req.body;
-    const message = GameEngine.trainTroops(type, amount);
-    return res.json({ msg: message, state: GameEngine.status() });
+    const result = GameEngine.trainTroops(type, amount);
+    return res.json(result);
+  },
+
+  collect(req, res) {
+    const result = GameEngine.collectResources();
+    return res.json(result);
+  },
+
+  addTower(req, res) {
+    const result = GameEngine.addTower();
+    return res.json(result);
+  },
+
+  upgradeWall(req, res) {
+    const result = GameEngine.upgradeWall();
+    return res.json(result);
+  },
+
+  reset(req, res) {
+    const result = GameEngine.resetGame();
+    return res.json(result);
+  },
+
+  nextMap(req, res) {
+    const result = GameEngine.nextMap();
+    return res.json(result);
   }
 };

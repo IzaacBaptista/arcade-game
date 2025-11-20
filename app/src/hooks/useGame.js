@@ -4,6 +4,11 @@ import {
   nextTurn,
   upgradeTower,
   trainTroops,
+  collectResources,
+  addTower,
+  upgradeWall,
+  resetGame,
+  nextMap,
 } from "../api/gameApi";
 
 export function useGame() {
@@ -14,24 +19,53 @@ export function useGame() {
     loadStatus();
   }, []);
 
+  function updateFrom(data) {
+    setState(data?.state ?? data);
+  }
+
   async function loadStatus() {
     const data = await getStatus();
-    setState(data);
+    updateFrom(data);
   }
 
   async function runNextTurn() {
     const data = await nextTurn();
-    setState(data);
+    updateFrom(data);
   }
 
   async function runUpgradeTower(id) {
     const data = await upgradeTower(id);
-    setState(data.state);
+    updateFrom(data);
   }
 
   async function runTrainTroops(type, amount) {
     const data = await trainTroops(type, amount);
-    setState(data.state);
+    updateFrom(data);
+  }
+
+  async function runCollect() {
+    const data = await collectResources();
+    updateFrom(data);
+  }
+
+  async function runAddTower() {
+    const data = await addTower();
+    updateFrom(data);
+  }
+
+  async function runUpgradeWall() {
+    const data = await upgradeWall();
+    updateFrom(data);
+  }
+
+  async function runResetGame() {
+    const data = await resetGame();
+    updateFrom(data);
+  }
+
+  async function runNextMap() {
+    const data = await nextMap();
+    updateFrom(data);
   }
 
   return {
@@ -40,5 +74,10 @@ export function useGame() {
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
+    runCollect,
+    runAddTower,
+    runUpgradeWall,
+    runResetGame,
+    runNextMap,
   };
 }

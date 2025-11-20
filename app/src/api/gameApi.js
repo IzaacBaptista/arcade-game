@@ -29,3 +29,28 @@ export async function trainTroops(type, amount) {
 
   return res.json();
 }
+
+export async function collectResources() {
+  const res = await fetch(`${API_URL}/collect`, { method: "POST" });
+  return res.json();
+}
+
+export async function addTower() {
+  const res = await fetch(`${API_URL}/tower/add`, { method: "POST" });
+  return res.json();
+}
+
+export async function upgradeWall() {
+  const res = await fetch(`${API_URL}/castle/wall/upgrade`, { method: "POST" });
+  return res.json();
+}
+
+export async function resetGame() {
+  const res = await fetch(`${API_URL}/reset`, { method: "POST" });
+  return res.json();
+}
+
+export async function nextMap() {
+  const res = await fetch(`${API_URL}/map/next`, { method: "POST" });
+  return res.json();
+}

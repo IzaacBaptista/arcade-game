@@ -1,14 +1,19 @@
 export default function Enemies({ enemies }) {
   return (
-    <div>
-      <h2>👹 Inimigos</h2>
-
+    <div className="ks-card-grid">
       {enemies.length === 0 ? (
-        <p>Nenhum inimigo no momento.</p>
+        <div className="ks-empty">Nenhum inimigo no momento.</div>
       ) : (
         enemies.map(e => (
-          <div key={e.id}>
-            {e.name} — HP {e.hp} — ATK {e.attack}
+          <div key={e.id} className="ks-card enemy-card">
+            <div className="ks-card-head">
+              <span className="ks-icon-circle danger">👹</span>
+              <div>
+                <p className="ks-label">{e.name}</p>
+                <strong className="ks-title">HP {e.hp}</strong>
+              </div>
+              <span className="ks-chip danger">ATK {e.attack}</span>
+            </div>
           </div>
         ))
       )}

@@ -1,4 +1,7 @@
 const initialState = {
+  map: 1,
+  maxStage: 3,
+  status: "ongoing", // ongoing | over | won
   stage: 1,
   turn: 1,
 

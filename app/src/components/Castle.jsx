@@ -2,23 +2,22 @@ export default function Castle({ castle }) {
   const hpPercent = Math.round((castle.hp / castle.max_hp) * 100);
 
   return (
-    <div>
-      <h2>🏰 Castelo</h2>
-      <div>
-        Vida: {castle.hp} / {castle.max_hp} ({hpPercent}%)
+    <div className="castle-card ks-card">
+      <div className="ks-card-head">
+        <span className="ks-icon-circle primary">🏰</span>
+        <div>
+          <p className="ks-label">Cidadela</p>
+          <strong className="ks-title">Castelo central</strong>
+        </div>
+        <span className="ks-chip">Muralha Lv {castle.wall_level}</span>
       </div>
-      <div>
-        Nível da muralha: {castle.wall_level} • Bônus de defesa: {castle.defense_bonus}%
+
+      <div className="ks-bar">
+        <div className="ks-bar-fill" style={{ width: `${hpPercent}%` }} />
       </div>
-      <div style={{ marginTop: 8, background: "#eee", height: 12, width: 240 }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${hpPercent}%`,
-            background: hpPercent > 50 ? "#4caf50" : "#e67e22",
-            transition: "width 0.3s ease",
-          }}
-        />
+      <div className="castle-stats">
+        <span>Vida {castle.hp} / {castle.max_hp}</span>
+        <span>Defesa +{castle.defense_bonus}%</span>
       </div>
     </div>
   );
