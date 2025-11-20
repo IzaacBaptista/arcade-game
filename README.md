@@ -11,7 +11,7 @@ Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**
 🎨 **Frontend**: React + CSS customizado  
 🧠 **Game Engine própria**: lógica de turnos, fases, torres, tropas e inimigos
 
-![preview](https://github.com/IzaacBaptista/arcade-game/raw/main/preview.png)
+<img width="939" height="926" alt="image" src="https://github.com/user-attachments/assets/1550c6aa-3e67-472e-92eb-30c26afceacb" />
 
 </div>
 
