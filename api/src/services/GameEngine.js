@@ -54,13 +54,13 @@ class GameEngine {
   }
 
   getEnemyReward(name, isBoss) {
-    if (isBoss) return 50;
+    if (isBoss) return 80;
     const baseRewards = {
       "Goblin": 5,
-      "Ork": 10,
-      "Lobo Ágil": 8
+      "Ork": 12,
+      "Lobo Ágil": 9
     };
-    return baseRewards[name] ?? 5;
+    return baseRewards[name] ?? 6;
   }
 
   generateEnemies(stage) {
@@ -96,6 +96,10 @@ class GameEngine {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
 
+    if (gameState.actionLocks.lastCollectTurn === gameState.turn) {
+      return { msg: "Coleta limitada a 1 por turno.", state: this.status() };
+    }
+
     const gold = 20 + gameState.stage * 5 + gameState.map * 3;
     const wood = 15 + gameState.stage * 4 + gameState.map * 2;
     const food = 12 + gameState.stage * 3 + gameState.map * 2;
@@ -104,6 +108,7 @@ class GameEngine {
     gameState.resources.wood += wood;
     gameState.resources.food += food;
     gameState.resources.energy += energy;
+    gameState.actionLocks.lastCollectTurn = gameState.turn;
     log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida e +${energy} energia.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
@@ -226,14 +231,23 @@ class GameEngine {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
 
+    if (gameState.actionLocks.lastBuilderCollectTurn === gameState.turn) {
+      return { msg: "Construtores já trabalharam neste turno.", state: this.status() };
+    }
+
     const { qty, efficiency } = gameState.builders;
-    const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * (0.8 + 0.1 * efficiency) * (qty / 3));
-    const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * (0.8 + 0.1 * efficiency));
-    const food = Math.round((18 + gameState.stage * 4 + gameState.map * 3) * (0.8 + 0.1 * efficiency));
+    const effectiveWorkers = Math.max(1, Math.pow(qty || 1, 0.85));
+    const efficiencyFactor = 0.75 + 0.12 * efficiency;
+    const loadFactor = effectiveWorkers / 2.2; // suaviza ganhos e reduz snowball
+
+    const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * efficiencyFactor * loadFactor);
+    const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * efficiencyFactor * loadFactor);
+    const food = Math.round((18 + gameState.stage * 4 + gameState.map * 3) * efficiencyFactor * loadFactor);
 
     gameState.resources.wood += wood;
     gameState.resources.gold += gold;
     gameState.resources.food += food;
+    gameState.actionLocks.lastBuilderCollectTurn = gameState.turn;
 
     log.push(`Construtores coletaram +${wood} madeira, +${gold} ouro e +${food} comida.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);

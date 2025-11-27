@@ -24,6 +24,11 @@ const initialState = {
     efficiency: 1
   },
 
+  actionLocks: {
+    lastCollectTurn: 0,
+    lastBuilderCollectTurn: 0
+  },
+
   towers: [
     {
       id: 1,
