@@ -1,12 +1,9 @@
-const potionData = [
-  { key: "heal", label: "Poção de cura", icon: "🧪", desc: "+HP no castelo" },
-  { key: "energy", label: "Poção de energia", icon: "⚡", desc: "+Energia" },
-  { key: "loot", label: "Poção de saque", icon: "💰", desc: "+Ouro e madeira" },
-];
-
 export default function Vault({ vault, onCollect, onUsePotion, onUseRare, onOpen }) {
   const artifacts = vault.artifacts || [];
   const potions = vault.potions || {};
+  
+  // Conta total de poções
+  const totalPotions = Object.values(potions).reduce((sum, qty) => sum + (qty || 0), 0);
 
   return (
     <div className="ks-card vault-card">
@@ -33,31 +30,12 @@ export default function Vault({ vault, onCollect, onUsePotion, onUseRare, onOpen
         )}
       </div>
 
-      <div className="ks-mini-label" style={{ marginTop: 6 }}>Clique para ver poções e itens</div>
-
-      <div className="ks-vault-grid">
-        {potionData.map(p => (
-          <div key={p.key} className="ks-card" title={p.desc}>
-            <div className="ks-card-head">
-              <span className="ks-icon-circle">{p.icon}</span>
-              <div>
-                <p className="ks-label">{p.label}</p>
-                <strong className="ks-title">Qtd {potions[p.key] ?? 0}</strong>
-              </div>
-            </div>
-            <p className="ks-subtitle">{p.desc}</p>
-            <div className="ks-card-actions">
-              <button
-                className="ks-btn ghost"
-                onClick={() => onUsePotion(p.key)}
-                disabled={(potions[p.key] ?? 0) <= 0}
-              >
-                Usar
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="ks-row" style={{ marginTop: 6, flexWrap: "wrap", gap: 6 }}>
+        <span className="ks-pill soft">🧪 {totalPotions} poções</span>
+        <span className="ks-pill soft">📦 {artifacts.length} artefatos</span>
       </div>
+
+      <div className="ks-mini-label" style={{ marginTop: 6 }}>Clique para ver poções e itens</div>
     </div>
   );
 }
