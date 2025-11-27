@@ -97,8 +97,9 @@ http://localhost:3000
 ## 🎯 Funcionalidades Principais
 
 ### 🏰 Castelo
-- Vida e defesa
+- Vida, defesa e cura com energia + comida
 - Muralha com níveis
+- Defesa extra de escudos na fase de combate
 - Ganha dano por turno se inimigos sobreviverem
 
 ### 🏹 Torres
@@ -110,21 +111,32 @@ http://localhost:3000
 - Tipos: soldiers e archers
 - Ataque coletivo por turno
 - Treinamento por recurso
+- Evolução de tropas (aumenta ATK / HP)
+
+### 🪖 Construtores
+- Construtores coletam madeira, ouro e comida por ação dedicada
+- Possível contratar mais construtores (custo em recursos)
+
+### 🏛 Quartel & Arsenal
+- Fabricação e melhoria de: catapultas, canhões antigos, cavalos, cavalaria, escudos e lanças
+- Armas de cerco e cavalaria adicionam dano extra; escudos somam defesa do castelo
 
 ### 👹 Inimigos
-- HP, ataque, escala por fase
-- Novos inimigos vão sendo desbloqueados
+- HP, max HP (com barra), ícone, ataque, distância e recompensa em ouro
+- Orks e chefes concedem energia e cura ao morrer
+- Novos inimigos vão sendo desbloqueados por fase
 
 ### 🔁 Sistema de turnos
 Mecânica a cada turno:
 1. Torres atacam  
-2. Tropas atacam  
-3. Inimigos revidam  
+2. Tropas + arsenal atacam  
+3. Inimigos revidam (considerando escudos)  
 4. Castelo recebe dano residual  
-5. Avança turno / fase
+5. Recompensas por inimigos mortos
+6. Avança turno / fase
 
 ### 🪵 Recursos
-- Ouro e madeira colecionáveis por ação dedicada
+- Ouro, madeira, comida e energia coletáveis por ações (coleta padrão e coleta de construtores)
 - Custos dinâmicos por fase/mapa
 
 ### 🔄 Reset / Mapa
@@ -145,8 +157,14 @@ Você pode substituir quando quiser por prints reais do seu jogo.
 - `POST /game/tower/:id/upgrade` — Upa uma torre.
 - `POST /game/tower/add` — Constrói uma nova torre.
 - `POST /game/troops/train` — Treina tropas (soldiers ou archers).
+- `POST /game/troops/upgrade` — Evolui tropas (melhora ATK / HP).
 - `POST /game/castle/wall/upgrade` — Reforça a muralha do castelo.
-- `POST /game/collect` — Coleta ouro e madeira.
+- `POST /game/castle/heal` — Cura o castelo usando energia + comida.
+- `POST /game/collect` — Coleta ouro, madeira, comida e energia.
+- `POST /game/builders/collect` — Coleta recursos com construtores.
+- `POST /game/builders/hire` — Contrata novos construtores.
+- `POST /game/armory/build` — Fabrica itens do arsenal (catapultas, canhões, etc.).
+- `POST /game/armory/upgrade` — Melhora itens do arsenal.
 - `POST /game/reset` — Reinicia toda a partida.
 - `POST /game/map/next` — Avança para o próximo mapa após vitória.
 
@@ -155,9 +173,9 @@ Você pode substituir quando quiser por prints reais do seu jogo.
 ## 🧠 Mapa da Game Engine
 - Sistema de dano
 - Cálculo dinâmico de fases
-- Escalonamento de HP e ATK de inimigos
-- Lógica de batalha
-- Economia (ouro, madeira)
+- Escalonamento de HP e ATK de inimigos (com ícone, recompensa e distância)
+- Lógica de batalha com torres, tropas, arsenal e defesa extra de escudos
+- Economia (ouro, madeira, comida, energia) e coleta via construtores
 - Log de eventos com histórico
 
 ---
