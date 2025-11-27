@@ -14,6 +14,7 @@ export default function Enemies({ enemies }) {
               </div>
               <span className="ks-chip danger">ATK {e.attack}</span>
             </div>
+            {e.boss && <div className="ks-chip danger" style={{ marginTop: 8 }}>BOSS</div>}
           </div>
         ))
       )}

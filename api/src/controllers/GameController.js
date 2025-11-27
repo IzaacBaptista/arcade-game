@@ -24,8 +24,42 @@ module.exports = {
     return res.json(result);
   },
 
+  upgradeTroops(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.upgradeTroops(type);
+    return res.json(result);
+  },
+
   collect(req, res) {
     const result = GameEngine.collectResources();
+    return res.json(result);
+  },
+
+  collectBuilders(req, res) {
+    const result = GameEngine.collectBuilders();
+    return res.json(result);
+  },
+
+  hireBuilders(req, res) {
+    const { amount = 1 } = req.body || {};
+    const result = GameEngine.hireBuilders(Number(amount) || 1);
+    return res.json(result);
+  },
+
+  heal(req, res) {
+    const result = GameEngine.healCastle();
+    return res.json(result);
+  },
+
+  buildArmory(req, res) {
+    const { type, amount = 1 } = req.body;
+    const result = GameEngine.buildArmory(type, Number(amount) || 1);
+    return res.json(result);
+  },
+
+  upgradeArmory(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.upgradeArmory(type);
     return res.json(result);
   },
 

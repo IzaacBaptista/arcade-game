@@ -30,8 +30,32 @@ export async function trainTroops(type, amount) {
   return res.json();
 }
 
+export async function upgradeTroops(type) {
+  const res = await fetch(`${API_URL}/troops/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
+
+  return res.json();
+}
+
 export async function collectResources() {
   const res = await fetch(`${API_URL}/collect`, { method: "POST" });
+  return res.json();
+}
+
+export async function collectBuilders() {
+  const res = await fetch(`${API_URL}/builders/collect`, { method: "POST" });
+  return res.json();
+}
+
+export async function hireBuilders(amount = 1) {
+  const res = await fetch(`${API_URL}/builders/hire`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  });
   return res.json();
 }
 
@@ -42,6 +66,29 @@ export async function addTower() {
 
 export async function upgradeWall() {
   const res = await fetch(`${API_URL}/castle/wall/upgrade`, { method: "POST" });
+  return res.json();
+}
+
+export async function healCastle() {
+  const res = await fetch(`${API_URL}/castle/heal`, { method: "POST" });
+  return res.json();
+}
+
+export async function buildArmory(type, amount) {
+  const res = await fetch(`${API_URL}/armory/build`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, amount }),
+  });
+  return res.json();
+}
+
+export async function upgradeArmory(type) {
+  const res = await fetch(`${API_URL}/armory/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
   return res.json();
 }
 

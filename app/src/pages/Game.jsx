@@ -3,6 +3,8 @@ import Towers from "../components/Towers";
 import Troops from "../components/Troops";
 import Enemies from "../components/Enemies";
 import Log from "../components/Log";
+import Builders from "../components/Builders";
+import Barracks from "../components/Barracks";
 
 import { useGame } from "../hooks/useGame";
 
@@ -13,9 +15,15 @@ export default function Game() {
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
+    runUpgradeTroops,
     runCollect,
+    runCollectBuilders,
+    runHireBuilders,
     runAddTower,
     runUpgradeWall,
+    runHealCastle,
+    runBuildArmory,
+    runUpgradeArmory,
     runResetGame,
     runNextMap,
   } = useGame();
@@ -35,6 +43,8 @@ export default function Game() {
     map,
     status,
     resources = {},
+    builders = { qty: 0, efficiency: 1 },
+    armory = {},
   } = state;
 
   const gameOver = status === "over";
@@ -58,6 +68,8 @@ export default function Game() {
           <div className="ks-pill-row">
             <span className="ks-pill gold">🪙 Ouro {resources.gold ?? 0}</span>
             <span className="ks-pill wood">🌲 Madeira {resources.wood ?? 0}</span>
+            <span className="ks-pill soft">⚡ Energia {resources.energy ?? 0}</span>
+            <span className="ks-pill soft">🥘 Comida {resources.food ?? 0}</span>
             <span className="ks-pill hp">❤️ {castle.hp} / {castle.max_hp}</span>
           </div>
         </div>
@@ -120,6 +132,15 @@ export default function Game() {
             </div>
           </div>
           <Castle castle={castle} />
+          <div className="ks-inline-actions" style={{ marginTop: 12 }}>
+            <button className="ks-btn primary" onClick={runHealCastle} disabled={!isActive}>
+              Curar castelo (energia + comida)
+            </button>
+            <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <Builders builders={state.builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
+          </div>
         </section>
 
         <section className="ks-panel troops-panel">
@@ -129,7 +150,21 @@ export default function Game() {
               <h2>Tropas</h2>
             </div>
           </div>
-          <Troops troops={troops} onTrain={runTrainTroops} />
+          <Troops troops={troops} onTrain={runTrainTroops} onUpgrade={runUpgradeTroops} />
+        </section>
+
+        <section className="ks-panel troops-panel">
+          <div className="ks-panel-header">
+            <div>
+              <p className="ks-eyebrow">Quartel & Arsenal</p>
+              <h2>Catapultas, canhões, cavalaria e armas</h2>
+            </div>
+          </div>
+          <Barracks
+            armory={armory}
+            onBuild={(type, amount) => runBuildArmory(type, amount)}
+            onUpgrade={runUpgradeArmory}
+          />
         </section>
 
         <section className="ks-panel log-panel">

@@ -1,4 +1,4 @@
-export default function Troops({ troops, onTrain }) {
+export default function Troops({ troops, onTrain, onUpgrade }) {
   return (
     <div className="ks-card-grid">
       {Object.entries(troops).map(([key, t]) => (
@@ -15,6 +15,12 @@ export default function Troops({ troops, onTrain }) {
             <span className="ks-pill soft">Qtd {t.qty}</span>
             <button className="ks-btn ghost" onClick={() => onTrain(key, 5)}>
               Treinar +5
+            </button>
+          </div>
+          <div className="ks-row">
+            <span className="ks-pill gold">HP {t.hp}</span>
+            <button className="ks-btn primary" onClick={() => onUpgrade(key)}>
+              Evoluir tropa
             </button>
           </div>
         </div>

@@ -1,8 +1,13 @@
 const { gameState, initialState } = require("../data/gameState");
 
 class GameEngine {
+  constructor() {
+    this.enemySeq = 0;
+  }
+
   resetState(keepMap = false) {
     const fresh = JSON.parse(JSON.stringify(initialState));
+    this.enemySeq = 0;
     if (keepMap) {
       fresh.map = gameState.map + 1;
     }
@@ -19,23 +24,36 @@ class GameEngine {
     return gameState;
   }
 
+  buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false) {
+    this.enemySeq += 1;
+    const bossMultiplier = isBoss ? 3.2 : 1;
+    return {
+      id: this.enemySeq,
+      name,
+      hp: Math.round((baseHp + difficulty * 4) * bossMultiplier),
+      attack: Math.round((baseAttack + difficulty * 1.5) * bossMultiplier),
+      distance,
+      boss: isBoss
+    };
+  }
+
   generateEnemies(stage) {
-    return [
-      {
-        id: 1,
-        name: "Goblin",
-        hp: 10 + stage * 2 + gameState.map * 3,
-        attack: 3 + stage + gameState.map,
-        distance: 3
-      },
-      {
-        id: 2,
-        name: "Ork",
-        hp: 25 + stage * 4 + gameState.map * 4,
-        attack: 6 + stage + gameState.map,
-        distance: 4
-      }
+    const difficulty = stage + gameState.map * 2;
+    const enemies = [
+      this.buildEnemy("Goblin", 12, 4, difficulty, 3),
+      this.buildEnemy("Ork", 28, 7, difficulty, 4)
     ];
+
+    if (stage >= 2) {
+      enemies.push(this.buildEnemy("Lobo Ágil", 18, 9, difficulty, 2));
+    }
+
+    const isBossStage = stage === gameState.maxStage;
+    if (isBossStage) {
+      enemies.push(this.buildEnemy("Chefe: Juggernaut", 80, 15, difficulty * 1.5, 4, true));
+    }
+
+    return enemies;
   }
 
   ensureOngoing(log) {
@@ -54,9 +72,13 @@ class GameEngine {
 
     const gold = 20 + gameState.stage * 5 + gameState.map * 3;
     const wood = 15 + gameState.stage * 4 + gameState.map * 2;
+    const food = 12 + gameState.stage * 3 + gameState.map * 2;
+    const energy = 6 + gameState.stage * 2;
     gameState.resources.gold += gold;
     gameState.resources.wood += wood;
-    log.push(`Coletou +${gold} ouro e +${wood} madeira.`);
+    gameState.resources.food += food;
+    gameState.resources.energy += energy;
+    log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida e +${energy} energia.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return { msg: "Recursos coletados", state: this.status() };
@@ -174,6 +196,168 @@ class GameEngine {
     return { msg: `Treinou ${amount} unidade(s) de ${type}.`, state: this.status() };
   }
 
+  collectBuilders() {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const { qty, efficiency } = gameState.builders;
+    const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * (0.8 + 0.1 * efficiency) * (qty / 3));
+    const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * (0.8 + 0.1 * efficiency));
+    const food = Math.round((18 + gameState.stage * 4 + gameState.map * 3) * (0.8 + 0.1 * efficiency));
+
+    gameState.resources.wood += wood;
+    gameState.resources.gold += gold;
+    gameState.resources.food += food;
+
+    log.push(`Construtores coletaram +${wood} madeira, +${gold} ouro e +${food} comida.`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: "Coleta de construtores concluída.", state: this.status() };
+  }
+
+  hireBuilders(amount = 1) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const costGold = (35 + gameState.stage * 6 + gameState.map * 4 + gameState.builders.qty * 10) * amount;
+    const costFood = (20 + gameState.stage * 5 + gameState.map * 3) * amount;
+
+    if (gameState.resources.gold < costGold || gameState.resources.food < costFood) {
+      return { msg: "Recursos insuficientes para contratar construtores.", state: this.status() };
+    }
+
+    gameState.resources.gold -= costGold;
+    gameState.resources.food -= costFood;
+    gameState.builders.qty += amount;
+
+    log.push(`Contratou ${amount} construtor(es). (custo ${costGold} ouro / ${costFood} comida)`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: "Construtores contratados.", state: this.status() };
+  }
+
+  upgradeTroops(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const troop = gameState.troops[type];
+    if (!troop) return { msg: "Tipo de tropa inválido.", state: this.status() };
+
+    const cost = 30 + troop.level * 15 + gameState.map * 5;
+
+    if (gameState.resources.gold < cost) {
+      return { msg: "Ouro insuficiente para evoluir tropas.", state: this.status() };
+    }
+
+    gameState.resources.gold -= cost;
+    troop.level += 1;
+    troop.attack = Math.round(troop.attack * 1.25 + 1);
+    troop.hp = Math.round(troop.hp + 3 + troop.level * 0.5);
+
+    log.push(`Tropas de ${type} evoluíram para nível ${troop.level} (+ATK, +HP). (custo ${cost} ouro)`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: `Tropas de ${type} evoluíram para nível ${troop.level}.`, state: this.status() };
+  }
+
+  healCastle() {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    if (gameState.castle.hp >= gameState.castle.max_hp) {
+      return { msg: "Castelo já está com vida máxima.", state: this.status() };
+    }
+
+    const energyCost = 12 + gameState.stage * 3;
+    const foodCost = 18 + gameState.stage * 4;
+
+    if (gameState.resources.energy < energyCost || gameState.resources.food < foodCost) {
+      return { msg: "Recursos insuficientes para curar (energia/comida).", state: this.status() };
+    }
+
+    gameState.resources.energy -= energyCost;
+    gameState.resources.food -= foodCost;
+
+    const heal = 120 + gameState.map * 20 + gameState.stage * 30;
+    gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + heal);
+
+    log.push(`Curou o castelo em ${heal} (custo ${energyCost} energia / ${foodCost} comida).`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: "Castelo curado.", state: this.status() };
+  }
+
+  buildArmory(type, amount = 1) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const item = gameState.armory[type];
+    if (!item) return { msg: "Tipo de arsenal inválido.", state: this.status() };
+
+    const costScale = 1 + (gameState.map - 1) * 0.12 + (gameState.stage - 1) * 0.08;
+    const baseCost = {
+      catapults: { gold: 40, wood: 50, energy: 10, food: 10 },
+      cannons: { gold: 60, wood: 35, energy: 12, food: 10 },
+      horses: { gold: 30, wood: 10, energy: 6, food: 30 },
+      cavalry: { gold: 45, wood: 20, energy: 8, food: 35 },
+      shields: { gold: 18, wood: 35, energy: 4, food: 8 },
+      spears: { gold: 24, wood: 40, energy: 5, food: 10 },
+    }[type];
+
+    const totalCost = Object.fromEntries(
+      Object.entries(baseCost).map(([key, val]) => [key, Math.round(val * amount * costScale)])
+    );
+
+    const lacks = Object.entries(totalCost).find(([res, val]) => (gameState.resources[res] ?? 0) < val);
+    if (lacks) {
+      return { msg: `Recursos insuficientes para fabricar ${type}.`, state: this.status() };
+    }
+
+    gameState.resources.gold -= totalCost.gold;
+    gameState.resources.wood -= totalCost.wood;
+    gameState.resources.energy -= totalCost.energy;
+    gameState.resources.food -= totalCost.food;
+    item.qty += amount;
+
+    log.push(`Fabricou ${amount} ${type}. (custo ${totalCost.gold} ouro, ${totalCost.wood} madeira, ${totalCost.food} comida, ${totalCost.energy} energia)`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: "Produção concluída.", state: this.status() };
+  }
+
+  upgradeArmory(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const item = gameState.armory[type];
+    if (!item) return { msg: "Tipo de arsenal inválido.", state: this.status() };
+
+    const costGold = 50 + item.level * 25 + gameState.map * 10;
+    const costWood = 30 + item.level * 20;
+    const costEnergy = 10 + item.level * 6;
+
+    if (gameState.resources.gold < costGold || gameState.resources.wood < costWood || gameState.resources.energy < costEnergy) {
+      return { msg: "Recursos insuficientes para melhorar o arsenal.", state: this.status() };
+    }
+
+    gameState.resources.gold -= costGold;
+    gameState.resources.wood -= costWood;
+    gameState.resources.energy -= costEnergy;
+    item.level += 1;
+
+    if (item.attack) {
+      item.attack = Math.round(item.attack * 1.2 + 2);
+    }
+    if (item.defense) {
+      item.defense = Math.round(item.defense * 1.25 + 1);
+    }
+
+    log.push(`Melhorou ${type} para nível ${item.level}. (custo ${costGold} ouro, ${costWood} madeira, ${costEnergy} energia)`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+
+    return { msg: "Arsenal melhorado.", state: this.status() };
+  }
+
   nextTurn() {
     const log = [];
 
@@ -193,6 +377,7 @@ class GameEngine {
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
         gameState.resources.gold += 10;
+        this.rewardForEnemy(target, log);
         gameState.enemies.shift();
       }
     }
@@ -203,6 +388,19 @@ class GameEngine {
       totalAttack += t.qty * t.attack;
     }
 
+    // arsenal contribui
+    const { armory } = gameState;
+    const siegeAttack =
+      (armory.catapults.qty * armory.catapults.attack) +
+      (armory.cannons.qty * armory.cannons.attack);
+    const cavalryAttack =
+      (armory.cavalry.qty * armory.cavalry.attack) +
+      (armory.horses.qty * Math.round(armory.horses.attack * 0.6));
+    const infantryAttack =
+      (armory.spears.qty * armory.spears.attack);
+
+    totalAttack += siegeAttack + cavalryAttack + infantryAttack;
+
     if (gameState.enemies.length > 0 && totalAttack > 0) {
       const target = gameState.enemies[0];
       target.hp -= totalAttack;
@@ -211,15 +409,18 @@ class GameEngine {
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
         gameState.resources.gold += 15;
+        this.rewardForEnemy(target, log);
         gameState.enemies.shift();
       }
     }
 
     // inimigos atacam castelo
     let castleDamage = 0;
+    const extraDefense = (armory.shields.qty * armory.shields.defense);
+    const defenseTotal = gameState.castle.defense_bonus + extraDefense;
 
     for (const enemy of gameState.enemies) {
-      const dmg = Math.max(0, enemy.attack - gameState.castle.defense_bonus);
+      const dmg = Math.max(0, enemy.attack - defenseTotal);
       castleDamage += dmg;
     }
 
@@ -250,6 +451,19 @@ class GameEngine {
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return gameState;
+  }
+
+  rewardForEnemy(enemy, log) {
+    const isOrk = enemy.name?.toLowerCase().includes("ork");
+    if (!isOrk && !enemy.boss) return;
+
+    const energyGain = enemy.boss ? 30 : 10;
+    const heal = enemy.boss ? 100 : 25;
+
+    gameState.resources.energy += energyGain;
+    gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + heal);
+
+    log.push(`${enemy.name} derrubado! +${energyGain} energia e +${heal} vida para o castelo.`);
   }
 }
 

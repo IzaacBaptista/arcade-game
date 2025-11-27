@@ -1,24 +1,28 @@
 :root {
-  --bg: #0d1829;
-  --bg-soft: #132235;
-  --panel: rgba(18, 33, 51, 0.86);
-  --panel-strong: rgba(20, 39, 60, 0.9);
-  --panel-border: #21324c;
-  --text: #e8edf5;
-  --muted: #9fb2c8;
-  --accent: #f8b73c;
-  --accent-2: #5cd6ff;
-  --danger: #f35c6e;
-  --success: #72d57b;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --bg: #74ac2e;
+  --bg-soft: #84c83c;
+  --panel: rgba(255, 252, 240, 0.9);
+  --panel-strong: rgba(255, 248, 226, 0.95);
+  --panel-border: #c49b3b;
+  --text: #28170b;
+  --muted: #5b452f;
+  --accent: #f2c14e;
+  --accent-2: #ec6942;
+  --danger: #d9515d;
+  --success: #5ba454;
+  --shadow: 0 20px 55px rgba(36, 23, 6, 0.35);
 }
 
 .kingshot-shell {
   min-height: 100vh;
   background:
-    radial-gradient(60% 60% at 20% 20%, rgba(92, 214, 255, 0.08), transparent),
-    radial-gradient(50% 50% at 80% 10%, rgba(243, 92, 110, 0.12), transparent),
-    linear-gradient(145deg, #0c1523 0%, #0f1f33 50%, #0d1829 100%);
+    radial-gradient(120px 120px at 20% 15%, rgba(247, 222, 126, 0.14), transparent),
+    radial-gradient(200px 200px at 80% 10%, rgba(236, 105, 66, 0.12), transparent),
+    radial-gradient(#6f9c2b 1px, transparent 0),
+    radial-gradient(#73a828 1px, transparent 0),
+    linear-gradient(145deg, #78b433 0%, #6d9f2d 60%, #629128 100%);
+  background-size: 22px 22px, 22px 22px, 18px 18px, 28px 28px, 100% 100%;
+  background-position: 0 0, 12px 14px, 0 0, 10px 8px, 0 0;
   color: var(--text);
   padding: 32px;
 }
@@ -38,7 +42,7 @@
   gap: 16px;
   padding: 20px 24px;
   border: 1px solid var(--panel-border);
-  background: linear-gradient(135deg, rgba(26, 45, 69, 0.95), rgba(26, 54, 86, 0.9));
+  background: linear-gradient(135deg, rgba(255, 248, 226, 0.95), rgba(248, 223, 138, 0.92));
   border-radius: 18px;
   box-shadow: var(--shadow);
   position: relative;
@@ -49,18 +53,18 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 60% 40%, rgba(248, 183, 60, 0.18), transparent 40%);
+  background: radial-gradient(circle at 60% 40%, rgba(236, 105, 66, 0.22), transparent 40%);
   pointer-events: none;
 }
 
 .ks-hero-text h1 {
   margin: 4px 0 6px;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
 .ks-eyebrow {
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.4px;
   font-size: 12px;
   color: var(--muted);
   margin: 0 0 2px;
@@ -84,14 +88,15 @@
   padding: 8px 12px;
   border-radius: 999px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(196, 155, 59, 0.4);
+  color: var(--text);
 }
 
-.ks-pill.gold { color: #f8d15c; border-color: rgba(248, 183, 60, 0.35); }
-.ks-pill.wood { color: #90e395; border-color: rgba(114, 213, 123, 0.35); }
-.ks-pill.hp { color: #f35c6e; border-color: rgba(243, 92, 110, 0.35); }
-.ks-pill.soft { color: var(--text); background: rgba(255,255,255,0.05); }
+.ks-pill.gold { background: rgba(242, 193, 78, 0.2); border-color: rgba(242, 193, 78, 0.6); }
+.ks-pill.wood { background: rgba(124, 172, 76, 0.25); border-color: rgba(124, 172, 76, 0.6); }
+.ks-pill.hp { background: rgba(217, 81, 93, 0.2); border-color: rgba(217, 81, 93, 0.6); color: #7a1320; }
+.ks-pill.soft { background: rgba(255, 255, 255, 0.65); border-color: rgba(196, 155, 59, 0.35); }
 
 .ks-hero-actions {
   display: flex;
@@ -108,8 +113,13 @@
 
 .ks-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-areas:
+    "map map"
+    "castle log"
+    "troops log-empty";
   gap: 18px;
+  align-items: start;
 }
 
 .ks-panel {
@@ -118,12 +128,17 @@
   background: var(--panel);
   border: 1px solid var(--panel-border);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(4px);
 }
 
 .map-panel {
-  grid-column: 1 / -1;
-  background: linear-gradient(145deg, rgba(13, 27, 46, 0.95), rgba(18, 40, 63, 0.95));
+  grid-area: map;
+  background: rgba(255, 252, 240, 0.82);
 }
+
+.castle-panel { grid-area: castle; }
+.troops-panel { grid-area: troops; }
+.log-panel { grid-area: log; align-self: start; }
 
 .ks-panel-header {
   display: flex;
@@ -144,17 +159,17 @@
 .ks-badge {
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(92, 214, 255, 0.12);
-  border: 1px solid rgba(92, 214, 255, 0.35);
-  color: var(--accent-2);
+  background: rgba(242, 193, 78, 0.18);
+  border: 1px solid rgba(196, 155, 59, 0.5);
+  color: #7a4d18;
   font-weight: 700;
   font-size: 13px;
 }
 
 .ks-badge.danger {
-  background: rgba(243, 92, 110, 0.12);
-  border-color: rgba(243, 92, 110, 0.35);
-  color: #ff9bad;
+  background: rgba(217, 81, 93, 0.16);
+  border-color: rgba(217, 81, 93, 0.5);
+  color: #7a1320;
 }
 
 .ks-map {
@@ -162,28 +177,34 @@
   border-radius: 14px;
   padding: 16px;
   overflow: hidden;
-  background: linear-gradient(145deg, rgba(23, 45, 68, 0.8), rgba(17, 38, 62, 0.9));
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  min-height: 320px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(40, 23, 11, 0.06)),
+    url("./assets/map-bg.svg") center/cover no-repeat;
+  border: 1px solid rgba(196, 155, 59, 0.4);
+  min-height: 360px;
+  box-shadow: 0 12px 35px rgba(28, 17, 7, 0.35);
 }
 
-.ks-map-ring {
+.ks-map::before {
+  content: "";
   position: absolute;
-  inset: 8px;
-  border-radius: 30px;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), transparent 35%),
+    radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.16), transparent 45%);
 }
-.ks-map-ring.ring-2 { inset: 24px; opacity: 0.5; }
-.ks-map-ring.ring-3 { inset: 40px; opacity: 0.35; }
+
+.ks-map-ring { display: none; }
 
 .ks-map-center {
   position: absolute;
-  inset: 45%;
+  inset: 44%;
   display: grid;
   place-items: center;
-  background: rgba(10, 16, 26, 0.8);
+  background: rgba(255, 255, 255, 0.76);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(196, 155, 59, 0.6);
+  box-shadow: 0 6px 20px rgba(28, 17, 7, 0.25);
 }
 
 .ks-map-flag {
@@ -194,13 +215,14 @@
   position: absolute;
   right: 16px;
   top: 16px;
-  background: rgba(243, 92, 110, 0.15);
-  color: #ff9bad;
+  background: linear-gradient(135deg, #7a4d18, #5b330b);
+  color: #fce6b6;
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(243, 92, 110, 0.35);
+  border: 1px solid rgba(40, 23, 11, 0.4);
   font-weight: 700;
   font-size: 13px;
+  box-shadow: 0 8px 16px rgba(28, 17, 7, 0.3);
 }
 
 .ks-map-grid {
@@ -210,6 +232,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
+  background: rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(6px);
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(196, 155, 59, 0.35);
+  box-shadow: inset 0 1px 8px rgba(196, 155, 59, 0.2);
 }
 
 .ks-card-grid {
@@ -223,7 +251,7 @@
   border: 1px solid var(--panel-border);
   padding: 12px;
   border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 25px rgba(36, 23, 6, 0.28);
 }
 
 .ks-card-head {
@@ -247,16 +275,16 @@
   margin-left: auto;
   padding: 6px 10px;
   border-radius: 10px;
-  background: rgba(92, 214, 255, 0.15);
-  border: 1px solid rgba(92, 214, 255, 0.25);
-  color: #9ae2ff;
+  background: rgba(242, 193, 78, 0.18);
+  border: 1px solid rgba(196, 155, 59, 0.45);
+  color: #7a4d18;
   font-weight: 700;
 }
 
 .ks-chip.danger {
-  background: rgba(243, 92, 110, 0.15);
-  border-color: rgba(243, 92, 110, 0.3);
-  color: #ff9bad;
+  background: rgba(217, 81, 93, 0.16);
+  border-color: rgba(217, 81, 93, 0.45);
+  color: #7a1320;
 }
 
 .ks-icon-circle {
@@ -265,12 +293,12 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(242, 193, 78, 0.22);
+  border: 1px solid rgba(196, 155, 59, 0.45);
 }
 
-.ks-icon-circle.primary { background: rgba(92, 214, 255, 0.18); }
-.ks-icon-circle.danger { background: rgba(243, 92, 110, 0.18); }
+.ks-icon-circle.primary { background: rgba(124, 172, 76, 0.25); }
+.ks-icon-circle.danger { background: rgba(217, 81, 93, 0.25); }
 
 .ks-card-actions {
   margin-top: 12px;
@@ -293,15 +321,15 @@
 .ks-bar {
   width: 100%;
   height: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(196, 155, 59, 0.2);
+  border: 1px solid rgba(196, 155, 59, 0.4);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .ks-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4ad2ff, #f8b73c);
+  background: linear-gradient(90deg, #7cb342, #f2c14e);
   transition: width 0.35s ease;
 }
 
@@ -324,14 +352,14 @@
 }
 
 .ks-btn.primary {
-  background: linear-gradient(135deg, #f8b73c, #f35c6e);
-  box-shadow: 0 10px 30px rgba(243, 92, 110, 0.35);
-  color: #0c1523;
+  background: linear-gradient(135deg, #f9dc5c, #ec6942);
+  box-shadow: 0 10px 30px rgba(236, 105, 66, 0.35);
+  color: #4c2d0a;
 }
 
 .ks-btn.ghost {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(196, 155, 59, 0.45);
 }
 
 .ks-btn:hover {
@@ -345,6 +373,8 @@
 .ks-log {
   display: grid;
   gap: 8px;
+  max-height: 340px;
+  overflow: auto;
 }
 
 .ks-log-line {
@@ -353,16 +383,17 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(196, 155, 59, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .ks-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f8b73c, #f35c6e);
+  background: linear-gradient(135deg, #f9dc5c, #ec6942);
   display: inline-block;
 }
 
@@ -370,9 +401,9 @@
   padding: 16px;
   text-align: center;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(196, 155, 59, 0.4);
 }
 
 .ks-loading {
@@ -395,29 +426,36 @@
 .ks-alert {
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(196, 155, 59, 0.4);
+  background: rgba(255, 248, 226, 0.9);
   color: var(--text);
   font-weight: 700;
   box-shadow: var(--shadow);
 }
 
 .ks-alert.danger {
-  background: rgba(243, 92, 110, 0.15);
-  border-color: rgba(243, 92, 110, 0.4);
-  color: #ffb0bd;
+  background: rgba(217, 81, 93, 0.18);
+  border-color: rgba(217, 81, 93, 0.45);
+  color: #7a1320;
 }
 
 .ks-alert.success {
-  background: rgba(114, 213, 123, 0.2);
-  border-color: rgba(114, 213, 123, 0.45);
-  color: #c2f3c7;
+  background: rgba(92, 172, 84, 0.16);
+  border-color: rgba(92, 172, 84, 0.45);
+  color: #215a23;
 }
 
 @media (max-width: 960px) {
   .kingshot-shell { padding: 18px; }
-  .ks-grid { grid-template-columns: 1fr; }
+  .ks-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "castle"
+      "troops"
+      "log";
+  }
   .ks-hero { flex-direction: column; }
   .ks-hero-actions { align-items: flex-start; }
-  .ks-map { min-height: 260px; }
+  .ks-map { min-height: 280px; }
 }
