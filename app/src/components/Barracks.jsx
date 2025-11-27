@@ -1,10 +1,19 @@
 const labels = {
   catapults: "Catapultas",
-  cannons: "Canhões antigos",
+  cannons: "Canhões antigos", 
   horses: "Cavalos",
   cavalry: "Cavalaria",
   shields: "Escudos",
   spears: "Lanças"
+};
+
+const icons = {
+  catapults: "🎯",
+  cannons: "💥",
+  horses: "🐎",
+  cavalry: "🐴", 
+  shields: "🛡️",
+  spears: "🗡️"
 };
 
 export default function Barracks({ armory, onBuild, onUpgrade }) {
@@ -13,7 +22,7 @@ export default function Barracks({ armory, onBuild, onUpgrade }) {
       {Object.entries(armory).map(([key, item]) => (
         <div key={key} className="ks-card">
           <div className="ks-card-head">
-            <span className="ks-icon-circle">🏹</span>
+            <span className="ks-icon-circle">{icons[key] || "🏹"}</span>
             <div>
               <p className="ks-label">{labels[key] ?? key}</p>
               <strong className="ks-title">Lv {item.level}</strong>
@@ -30,6 +39,11 @@ export default function Barracks({ armory, onBuild, onUpgrade }) {
             <button className="ks-btn ghost" onClick={() => onBuild(key, 1)}>Fabricar +1</button>
             <button className="ks-btn primary" onClick={() => onUpgrade(key)}>Melhorar</button>
           </div>
+          {item.qty > 0 && (
+            <div className="ks-row" style={{ marginTop: 8 }}>
+              <span className="ks-pill success">⚡ Implantado no campo</span>
+            </div>
+          )}
         </div>
       ))}
     </div>

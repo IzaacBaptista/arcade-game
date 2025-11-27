@@ -26,7 +26,8 @@ const initialState = {
 
   builders: {
     qty: 3,
-    efficiency: 1
+    efficiency: 1,
+    workers: []
   },
 
   runes: {
@@ -82,6 +83,15 @@ const initialState = {
     paths: 2,
     effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] }
   },
+
+  builderTiles: [
+    { id: 1, type: "wood", richness: 1.0, assigned: 0 },
+    { id: 2, type: "gold", richness: 0.9, assigned: 0 },
+    { id: 3, type: "food", richness: 1.1, assigned: 0 },
+    { id: 4, type: "stone", richness: 0.8, assigned: 0 },
+    { id: 5, type: "iron", richness: 0.7, assigned: 0 },
+    { id: 6, type: "energy", richness: 0.6, assigned: 0 }
+  ],
 
   techTree: {
     ferro: 0,

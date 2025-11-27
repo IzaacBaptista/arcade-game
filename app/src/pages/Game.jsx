@@ -8,6 +8,7 @@ import Builders from "../components/Builders";
 import Barracks from "../components/Barracks";
 import Vault from "../components/Vault";
 import VaultModal from "../components/VaultModal";
+import BattlefieldTroops from "../components/BattlefieldTroops";
 import { login, register } from "../api/gameApi";
 
 import { useGame } from "../hooks/useGame";
@@ -23,7 +24,6 @@ export default function Game() {
   const {
     state,
     loading,
-    token,
     setToken,
     logout,
     runNextTurn,
@@ -352,6 +352,20 @@ export default function Game() {
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
             <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
           </div>
+          <div className="ks-pill-row" style={{ marginTop: 8 }}>
+            <span className="ks-pill energy">
+              ⚔️ Tropas: {Object.values(troops || {}).reduce((sum, t) => sum + (t.qty || 0), 0)} unidades
+            </span>
+            <span className="ks-pill wood">
+              🎯 Arsenal: {Object.values(armory || {}).reduce((sum, a) => sum + (a.qty || 0), 0)} equipamentos
+            </span>
+            <span className="ks-pill stone">
+              💥 ATK Total: {
+                Object.values(troops || {}).reduce((sum, t) => sum + (t.qty * t.attack || 0), 0) + 
+                Object.values(armory || {}).reduce((sum, a) => sum + (a.qty * (a.attack || 0)), 0)
+              }
+            </span>
+          </div>
           <div className="ks-timeline">
             {timeline.map((t, idx) => (
               <div key={idx} className={`ks-timeline-item ${t.side}`}>
@@ -423,6 +437,7 @@ export default function Game() {
               <Towers towers={towers} onUpgrade={runUpgradeTower} />
               <Enemies enemies={enemies} />
             </div>
+            <BattlefieldTroops troops={troops} armory={armory} />
           </div>
         </section>
 

@@ -648,6 +648,69 @@
   padding: 6px 10px;
   border-radius: 10px;
   background: rgba(236, 139, 69, 0.18);
+}
+
+/* Tropas no campo de batalha */
+.ks-battlefield-troops {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ks-battlefield-troops.empty {
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+}
+
+.ks-empty-message {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.ks-troop-unit,
+.ks-armory-unit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--panel-border);
+  font-size: 12px;
+  font-weight: bold;
+  pointer-events: auto;
+  cursor: help;
+}
+
+.ks-troop-unit {
+  background: rgba(111, 179, 92, 0.15);
+  border-color: rgba(111, 179, 92, 0.4);
+  color: #2f5c1e;
+}
+
+.ks-armory-unit {
+  background: rgba(242, 193, 78, 0.15);
+  border-color: rgba(242, 193, 78, 0.4);
+  color: #5c4a1e;
+}
+
+.ks-troop-icon,
+.ks-armory-icon {
+  font-size: 14px;
+}
+
+.ks-troop-count,
+.ks-armory-count {
+  font-size: 11px;
+  font-weight: bold;
   border: 1px solid rgba(236, 139, 69, 0.4);
   font-weight: 700;
   display: flex;

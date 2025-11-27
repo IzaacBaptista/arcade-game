@@ -1,6 +1,18 @@
 const { randomUUID } = require("crypto");
 const { gameState, initialState } = require("../data/gameState");
 
+function shortageMessage(required) {
+  const res = gameState.resources;
+  const missing = [];
+  if (required.gold && res.gold < required.gold) missing.push(`ouro ${res.gold}/${required.gold}`);
+  if (required.wood && res.wood < required.wood) missing.push(`madeira ${res.wood}/${required.wood}`);
+  if (required.energy && res.energy < required.energy) missing.push(`energia ${res.energy}/${required.energy}`);
+  if (required.food && res.food < required.food) missing.push(`comida ${res.food}/${required.food}`);
+  if (required.stone && res.stone < required.stone) missing.push(`pedra ${res.stone}/${required.stone}`);
+  if (required.iron && res.iron < required.iron) missing.push(`ferro ${res.iron}/${required.iron}`);
+  return missing.length ? `Recursos insuficientes: ${missing.join(", ")}` : "Recursos insuficientes.";
+}
+
 class GameEngine {
   constructor() {
     this.enemySeq = 0;
@@ -35,6 +47,14 @@ class GameEngine {
     // desbloqueia a fera gigante a partir do mapa 2
     if (fresh.map >= 2) {
       fresh.hero.beast = { unlocked: true, ready: true, activeTurns: 0 };
+    }
+
+    // garante itens raros disponíveis após mapa 2
+    if (fresh.vault && fresh.vault.rare) {
+      fresh.vault.rare = fresh.vault.rare.map(r => {
+        if (fresh.map >= 2) return { ...r, unlocked: true };
+        return r;
+      });
     }
     Object.assign(gameState, fresh);
   }
@@ -77,7 +97,8 @@ class GameEngine {
       resist,
       shieldReady: isBoss,
       speed: baseSpeed,
-      initiative
+      initiative,
+      bossSkills: isBoss ? ["fury", "stomp", "gobcall", "resist"] : []
     };
   }
 
@@ -129,6 +150,17 @@ class GameEngine {
     return JSON.parse(JSON.stringify(this.mapLayouts[idx]));
   }
 
+  ensureWorkersCount() {
+    if (!gameState.builders.workers) gameState.builders.workers = [];
+    while (gameState.builders.workers.length < (gameState.builders.qty || 0)) {
+      const id = gameState.builders.workers.length + 1;
+      gameState.builders.workers.push({ id, profession: "wood", fatigue: 0, dead: false });
+    }
+    if (gameState.builders.workers.length > (gameState.builders.qty || 0)) {
+      gameState.builders.workers = gameState.builders.workers.slice(0, gameState.builders.qty);
+    }
+  }
+
   ensureOngoing(log) {
     if (gameState.status !== "ongoing") {
       if (log) {
@@ -175,7 +207,7 @@ class GameEngine {
     const costWood = 35 + 8 * gameState.stage + 4 * gameState.map;
 
     if (gameState.resources.gold < costGold || gameState.resources.wood < costWood) {
-      return { msg: "Recursos insuficientes para construir uma torre.", state: this.status() };
+      return { msg: shortageMessage({ gold: costGold, wood: costWood }), state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -202,7 +234,7 @@ class GameEngine {
 
     const costWood = 45 + gameState.castle.wall_level * 20 + gameState.map * 5;
     if (gameState.resources.wood < costWood) {
-      return { msg: "Madeira insuficiente para reforçar a muralha.", state: this.status() };
+      return { msg: shortageMessage({ wood: costWood }), state: this.status() };
     }
 
     gameState.resources.wood -= costWood;
@@ -245,7 +277,7 @@ class GameEngine {
     const cost = 40 + (tower.level * 20);
 
     if (gameState.resources.gold < cost) {
-      return { msg: "Ouro insuficiente.", state: this.status() };
+      return { msg: shortageMessage({ gold: cost }), state: this.status() };
     }
 
     gameState.resources.gold -= cost;
@@ -288,23 +320,61 @@ class GameEngine {
       return { msg: "Construtores já trabalharam neste turno.", state: this.status() };
     }
 
-    const { qty, efficiency } = gameState.builders;
-    const effectiveWorkers = Math.max(1, Math.pow(qty || 1, 0.85));
+    this.ensureWorkersCount();
+    const { efficiency } = gameState.builders;
+    const tiles = gameState.builderTiles || [];
+    const workers = gameState.builders.workers || [];
+
+    // auto atribui trabalhadores aos tiles com menos atribuídos
+    tiles.forEach(t => t.assigned = 0);
+    workers.forEach(w => {
+      const target = tiles.sort((a, b) => a.assigned - b.assigned)[0];
+      if (target) {
+        target.assigned += 1;
+        w.tileId = target.id;
+        w.profession = w.profession || target.type;
+      }
+    });
+
+    const effectiveWorkers = Math.max(1, Math.pow((gameState.builders.qty || workers.length || 1), 0.85));
     const efficiencyFactor = 0.75 + 0.12 * efficiency;
     const loadFactor = effectiveWorkers / 2.2;
 
-    const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * efficiencyFactor * loadFactor);
-    const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * efficiencyFactor * loadFactor);
-    const food = Math.round((18 + gameState.stage * 4 + gameState.map * 3) * efficiencyFactor * loadFactor);
-    const stone = Math.round((14 + gameState.stage * 3 + gameState.map * 2) * efficiencyFactor * loadFactor);
+    const totalYield = { wood: 0, gold: 0, food: 0, stone: 0, iron: 0, energy: 0 };
+    let tired = 0;
+    let dead = 0;
 
-    gameState.resources.wood += wood;
-    gameState.resources.gold += gold;
-    gameState.resources.food += food;
-    gameState.resources.stone += stone;
+    workers.forEach(w => {
+      if (w.dead || w.fatigue >= 100) {
+        tired += 1;
+        return;
+      }
+      const tile = tiles.find(t => t.id === w.tileId) || tiles[0];
+      if (!tile) return;
+      const profBonus = tile.type === (w.profession || tile.type) ? 1.1 : 1;
+      const base = (20 + gameState.stage * 5 + gameState.map * 3) * tile.richness;
+      const yieldVal = Math.round(base * efficiencyFactor * loadFactor * profBonus / Math.max(1, workers.length));
+      if (tile.type in totalYield) totalYield[tile.type] += yieldVal;
+
+      const energyCost = 2 + Math.round((w.fatigue || 0) / 40);
+      if ((gameState.resources.energy || 0) < energyCost) {
+        tired += 1;
+        return;
+      }
+      gameState.resources.energy -= energyCost;
+      w.fatigue = Math.min(120, (w.fatigue || 0) + 15);
+      if (w.fatigue > 80 && Math.random() < 0.08) {
+        w.dead = true;
+        dead += 1;
+      }
+    });
+
+    Object.entries(totalYield).forEach(([k, v]) => { gameState.resources[k] += v; });
     gameState.actionLocks.lastBuilderCollectTurn = gameState.turn;
 
-    log.push(`Construtores coletaram +${wood} madeira, +${gold} ouro, +${food} comida e +${stone} pedra.`);
+    log.push(`Construtores coletaram +${totalYield.wood} madeira, +${totalYield.gold} ouro, +${totalYield.food} comida, +${totalYield.stone} pedra, +${totalYield.iron} ferro, +${totalYield.energy} energia.`);
+    if (tired) log.push(`${tired} trabalhador(es) cansados/faltou energia.`);
+    if (dead) log.push(`${dead} trabalhador(es) morreram em acidentes.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return { msg: "Coleta de construtores concluída.", state: this.status() };
@@ -318,12 +388,13 @@ class GameEngine {
     const costFood = (20 + gameState.stage * 5 + gameState.map * 3) * amount;
 
     if (gameState.resources.gold < costGold || gameState.resources.food < costFood) {
-      return { msg: "Recursos insuficientes para contratar construtores.", state: this.status() };
+      return { msg: shortageMessage({ gold: costGold, food: costFood }), state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
     gameState.resources.food -= costFood;
     gameState.builders.qty += amount;
+    this.ensureWorkersCount();
 
     log.push(`Contratou ${amount} construtor(es). (custo ${costGold} ouro / ${costFood} comida)`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -368,7 +439,7 @@ class GameEngine {
     const costEnergy = 30 + current * 12;
 
     if (gameState.resources.gold < costGold || gameState.resources.wood < costWood || gameState.resources.energy < costEnergy) {
-      return { msg: "Recursos insuficientes para pesquisar.", state: this.status() };
+      return { msg: shortageMessage({ gold: costGold, wood: costWood, energy: costEnergy }), state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -401,7 +472,8 @@ class GameEngine {
     if (type === "meteor") {
       const target = gameState.enemies[0];
       if (target) {
-        const dmg = 70 + gameState.map * 10;
+        const resist = target.bossSkills?.includes("resist") ? 0.5 : 1;
+        const dmg = Math.round((70 + gameState.map * 10) * resist);
         target.hp -= dmg;
         log.push(`Meteoro caiu em ${target.name} causando ${dmg}.`);
         if (target.hp <= 0) {
@@ -412,9 +484,14 @@ class GameEngine {
         applied = true;
       }
     } else if (type === "ice") {
-      gameState.effects.enemyWeakTurns = 2;
-      log.push("Feitiço de gelo: inimigos enfraquecidos por 2 turnos.");
-      applied = true;
+      const bossHasResist = gameState.enemies.some(e => e.boss && e.bossSkills?.includes("resist"));
+      if (bossHasResist) {
+        log.push("Feitiço de gelo resistido pelo chefe!");
+      } else {
+        gameState.effects.enemyWeakTurns = 2;
+        log.push("Feitiço de gelo: inimigos enfraquecidos por 2 turnos.");
+        applied = true;
+      }
     } else if (type === "shield") {
       gameState.effects.castleShield = 120 + gameState.map * 20;
       log.push("Escudo mágico levantado no castelo.");
@@ -482,7 +559,7 @@ class GameEngine {
 
     const lacks = Object.entries(totalCost).find(([res, val]) => (gameState.resources[res] ?? 0) < val);
     if (lacks) {
-      return { msg: `Recursos insuficientes para fabricar ${type}.`, state: this.status() };
+      return { msg: shortageMessage(totalCost), state: this.status() };
     }
 
     gameState.resources.gold -= totalCost.gold;
@@ -506,7 +583,7 @@ class GameEngine {
     const costEnergy = 35 + (gameState.runes[type] || 0) * 20;
 
     if (gameState.resources.gold < costGold || gameState.resources.energy < costEnergy) {
-      return { msg: "Recursos insuficientes para runa.", state: this.status() };
+      return { msg: shortageMessage({ gold: costGold, energy: costEnergy }), state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -620,7 +697,7 @@ class GameEngine {
     const costEnergy = 10 + item.level * 6;
 
     if (gameState.resources.gold < costGold || gameState.resources.wood < costWood || gameState.resources.energy < costEnergy) {
-      return { msg: "Recursos insuficientes para melhorar o arsenal.", state: this.status() };
+      return { msg: shortageMessage({ gold: costGold, wood: costWood, energy: costEnergy }), state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -647,6 +724,30 @@ class GameEngine {
     if (!this.ensureOngoing(log)) {
       gameState.log = [...log, ...gameState.log].slice(0, 10);
       return gameState;
+    }
+
+    // Chefe usa habilidades
+    const boss = gameState.enemies.find(e => e.boss);
+    if (boss) {
+      if (boss.bossSkills?.includes("fury")) {
+        const buff = Math.round(5 + gameState.stage * 1.5);
+        gameState.enemies.forEach(e => e.attack += buff);
+        log.push("Grito da Fúria: inimigos ganharam ataque extra!");
+        boss.bossSkills = boss.bossSkills.filter(s => s !== "fury");
+      }
+      if (boss.bossSkills?.includes("stomp")) {
+        gameState.castle.defense_bonus = Math.max(0, gameState.castle.defense_bonus - 10);
+        log.push("Pisada Sísmica: defesa da muralha reduzida!");
+        boss.bossSkills = boss.bossSkills.filter(s => s !== "stomp");
+      }
+      if (boss.bossSkills?.includes("gobcall")) {
+        const difficulty = gameState.stage + gameState.map * 2;
+        const gob1 = this.buildEnemy("Goblin", 12, 4, difficulty, 3);
+        const gob2 = this.buildEnemy("Goblin", 12, 4, difficulty, 3);
+        gameState.enemies.push(gob1, gob2);
+        log.push("Chamado dos Goblins: 2 goblins extras entraram em campo!");
+        boss.bossSkills = boss.bossSkills.filter(s => s !== "gobcall");
+      }
     }
 
     // decaimento de buffs e itens raros
@@ -901,6 +1002,7 @@ class GameEngine {
 
   setState(stateObj) {
     Object.assign(gameState, JSON.parse(JSON.stringify(stateObj)));
+    this.ensureWorkersCount();
   }
 
   state() {

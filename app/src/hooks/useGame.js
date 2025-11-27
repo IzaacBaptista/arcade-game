@@ -74,8 +74,7 @@ export function useGame() {
   }
 
   async function runUpgradeTower(id) {
-    const data = await upgradeTower(id);
-    updateFrom(data);
+    return upgradeTower(id).then(d => { updateFrom(d); return d; });
   }
 
   async function runTrainTroops(type, amount) {
@@ -109,13 +108,11 @@ export function useGame() {
   }
 
   async function runAddTower() {
-    const data = await addTower();
-    updateFrom(data);
+    return addTower().then(d => { updateFrom(d); return d; });
   }
 
   async function runUpgradeWall() {
-    const data = await upgradeWall();
-    updateFrom(data);
+    return upgradeWall().then(d => { updateFrom(d); return d; });
   }
 
   async function runHealCastle() {
@@ -129,23 +126,19 @@ export function useGame() {
   }
 
   async function runApplyRune(type) {
-    const data = await applyRune(type);
-    updateFrom(data);
+    return applyRune(type).then(d => { updateFrom(d); return d; });
   }
 
   async function runCollectTreasure() {
-    const data = await collectTreasure();
-    updateFrom(data);
+    return collectTreasure().then(d => { updateFrom(d); return d; });
   }
 
   async function runUsePotion(type) {
-    const data = await consumePotion(type);
-    updateFrom(data);
+    return consumePotion(type).then(d => { updateFrom(d); return d; });
   }
 
   async function runUseRareItem(type) {
-    const data = await consumeRareItem(type);
-    updateFrom(data);
+    return consumeRareItem(type).then(d => { updateFrom(d); return d; });
   }
 
   async function runSummonBeast() {
@@ -154,18 +147,15 @@ export function useGame() {
   }
 
   async function runBuildArmory(type, amount) {
-    const data = await buildArmory(type, amount);
-    updateFrom(data);
+    return buildArmory(type, amount).then(d => { updateFrom(d); return d; });
   }
 
   async function runUpgradeArmory(type) {
-    const data = await upgradeArmory(type);
-    updateFrom(data);
+    return upgradeArmory(type).then(d => { updateFrom(d); return d; });
   }
 
   async function runResetGame() {
-    const data = await resetGame();
-    updateFrom(data);
+    return resetGame().then(d => { updateFrom(d); return d; });
   }
 
   async function runNextMap() {
