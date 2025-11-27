@@ -278,7 +278,7 @@ class GameEngine {
     const { qty, efficiency } = gameState.builders;
     const effectiveWorkers = Math.max(1, Math.pow(qty || 1, 0.85));
     const efficiencyFactor = 0.75 + 0.12 * efficiency;
-    const loadFactor = effectiveWorkers / 2.2; // suaviza ganhos e reduz snowball
+    const loadFactor = effectiveWorkers / 2.2;
 
     const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * efficiencyFactor * loadFactor);
     const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * efficiencyFactor * loadFactor);
@@ -597,7 +597,6 @@ class GameEngine {
       gameState.hero.cooldown -= 1;
     }
 
-    // eventos aleatórios
     let eventBuff = { towerAtk: 1, castleDef: 0, troopAtk: 1 };
     if (Math.random() < 0.2) {
       const events = [
@@ -622,7 +621,6 @@ class GameEngine {
       }
     }
 
-    // efeitos de início de turno
     if (gameState.effects.enemyWeakTurns > 0) {
       gameState.effects.enemyWeakTurns -= 1;
     }
@@ -634,7 +632,6 @@ class GameEngine {
       }
     }
 
-    // suporte cura aliados
     const supportUnits = gameState.enemies.filter(e => e.role === "support");
     if (supportUnits.length > 0) {
       const heal = 6 + gameState.stage;
@@ -661,7 +658,7 @@ class GameEngine {
       if (sourceType === "siege") mult = resist.siege ?? 1;
       let damage = Math.round(rawDamage * mult);
       if (gameState.effects.enemyWeakTurns > 0) {
-        damage = Math.round(damage * 1.15); // inimigos enfraquecidos sofrem mais
+        damage = Math.round(damage * 1.15);
       }
       if (enemy.tempShield && enemy.tempShield > 0) {
         const absorbed = Math.min(enemy.tempShield, damage);
@@ -675,7 +672,6 @@ class GameEngine {
       return damage;
     };
 
-    // torres atacam
     for (const tower of gameState.towers) {
       if (gameState.enemies.length === 0) break;
 
@@ -692,13 +688,11 @@ class GameEngine {
       }
     }
 
-    // tropas atacam
     let totalAttack = 0;
     for (const t of Object.values(gameState.troops)) {
       totalAttack += t.qty * t.attack * troopMult;
     }
 
-    // arsenal contribui
     const { armory } = gameState;
     const siegeAttack =
       (armory.catapults.qty * armory.catapults.attack) +
@@ -712,10 +706,10 @@ class GameEngine {
     totalAttack += (siegeAttack * siegeMult) + (cavalryAttack * troopMult) + (infantryAttack * troopMult);
 
     if (gameState.enemies.length > 0 && totalAttack > 0) {
-      // calcula ordem por speed: flyers, tropas rápidas podem agir antes
+
       const fastestEnemy = [...gameState.enemies].sort((a, b) => (b.speed || 0) - (a.speed || 0))[0];
       if (fastestEnemy && (fastestEnemy.speed || 0) >= 9) {
-        // ataque pré-turno no castelo
+
         const preDmg = Math.max(0, Math.round(fastestEnemy.attack * 0.8) - (gameState.castle.defense_bonus || 0));
         if (preDmg > 0) {
           gameState.castle.hp = Math.max(0, gameState.castle.hp - preDmg);
@@ -734,7 +728,6 @@ class GameEngine {
       }
     }
 
-    // inimigos atacam castelo
     let castleDamage = 0;
     const extraDefense = (armory.shields.qty * armory.shields.defense);
     const runeDefense = (gameState.towers || []).reduce((acc, t) => acc + (t.rune_guard || 0), 0) * 1.5;
@@ -750,7 +743,6 @@ class GameEngine {
       const dmg = Math.max(0, enemyAttack - defenseTotal);
       castleDamage += dmg;
       if (enemy.boss) {
-        // chefe ataca duas vezes
         castleDamage += Math.max(0, enemyAttack - defenseTotal);
       }
     }
@@ -774,7 +766,6 @@ class GameEngine {
       gameState.achievements.winStreak = 0;
     }
 
-    // todos inimigos morreram → próxima fase
     if (gameState.enemies.length === 0 && gameState.status === "ongoing") {
       if (gameState.stage >= gameState.maxStage) {
         gameState.status = "won";

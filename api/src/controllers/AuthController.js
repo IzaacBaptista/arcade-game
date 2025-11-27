@@ -15,7 +15,7 @@ module.exports = {
         [email, hash]
       );
       const userId = result.rows[0].id;
-      // cria save inicial
+
       await db.query("INSERT INTO saves (user_id, state) VALUES ($1, $2)", [userId, freshState()]);
       const token = jwt.sign({ sub: userId }, JWT_SECRET, { expiresIn: "7d" });
       return res.json({ token });

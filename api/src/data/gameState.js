@@ -1,7 +1,7 @@
 const initialState = {
   map: 1,
   maxStage: 3,
-  status: "ongoing", // ongoing | over | won
+  status: "ongoing",
   stage: 1,
   turn: 1,
 
@@ -116,7 +116,6 @@ const initialState = {
   log: []
 };
 
-// estado mutável da aplicação
 let gameState = JSON.parse(JSON.stringify(initialState));
 
 module.exports = {

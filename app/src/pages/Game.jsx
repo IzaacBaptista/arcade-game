@@ -167,6 +167,21 @@ export default function Game() {
   const gameWon = status === "won";
   const isActive = status === "ongoing";
 
+  const timeline = (() => {
+    const items = [];
+    const troopSpeeds = Object.values(troops || {});
+    if (troopSpeeds.length > 0) {
+      const totalQty = troopSpeeds.reduce((acc, t) => acc + (t.qty || 0), 0) || 1;
+      const weighted = troopSpeeds.reduce((acc, t) => acc + (t.speed || 0) * (t.qty || 0), 0) / totalQty;
+      items.push({ name: "Tropas", icon: "⚔️", speed: Math.round(weighted) || 5, side: "ally" });
+    }
+    if (towers?.length) {
+      items.push({ name: "Torres", icon: "🏹", speed: 5, side: "ally" });
+    }
+    (enemies || []).forEach(e => items.push({ name: e.name, icon: e.icon || "👹", speed: e.speed || 4, side: "enemy", boss: e.boss }));
+    return items.sort((a, b) => (b.speed || 0) - (a.speed || 0)).slice(0, 10);
+  })();
+
   async function handleAuthSubmit(e) {
     e.preventDefault();
     const fn = authForm.mode === "login" ? login : register;
@@ -273,6 +288,18 @@ export default function Game() {
             <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
             <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
+          </div>
+          <div className="ks-timeline">
+            {timeline.map((t, idx) => (
+              <div key={idx} className={`ks-timeline-item ${t.side}`}>
+                <span className="ks-timeline-icon">{t.icon}</span>
+                <div>
+                  <p className="ks-label">{t.name}</p>
+                  <strong className="ks-title">SPD {t.speed}</strong>
+                </div>
+                {t.boss && <span className="ks-chip danger">BOSS</span>}
+              </div>
+            ))}
           </div>
         </section>
 

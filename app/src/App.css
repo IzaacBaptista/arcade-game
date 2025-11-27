@@ -583,3 +583,30 @@
   .ks-hero-actions { align-items: flex-start; }
   .ks-map { min-height: 320px; }
 }
+.ks-timeline {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(120px, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+  overflow-x: auto;
+}
+
+.ks-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid rgba(226,207,159,0.6);
+}
+
+.ks-timeline-item.enemy {
+  background: rgba(217, 81, 93, 0.12);
+  border-color: rgba(217, 81, 93, 0.35);
+}
+
+.ks-timeline-icon {
+  font-size: 18px;
+}
