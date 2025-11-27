@@ -24,7 +24,18 @@ class GameEngine {
       fresh.map = gameState.map + 1;
     }
     fresh.mapLayout = this.pickLayout(fresh.map);
-    fresh.vault = { jewels: Math.max(30, initialState.vault.jewels - 10 + fresh.map * 5), artifacts: [], potions: { heal: 2, energy: 2, loot: 1 } };
+
+    if (keepMap) {
+      // mantém inventário acumulado
+      fresh.vault = JSON.parse(JSON.stringify(gameState.vault || initialState.vault));
+      // garante poções e joias mínimas
+      fresh.vault.jewels = fresh.vault.jewels ?? 0;
+      fresh.vault.potions = fresh.vault.potions || { heal: 0, energy: 0, loot: 0 };
+    }
+    // desbloqueia a fera gigante a partir do mapa 2
+    if (fresh.map >= 2) {
+      fresh.hero.beast = { unlocked: true, ready: true, activeTurns: 0 };
+    }
     Object.assign(gameState, fresh);
   }
 
@@ -573,6 +584,30 @@ class GameEngine {
     return { msg: "Item ativado.", state: this.status() };
   }
 
+  summonBeast() {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    const beast = gameState.hero?.beast;
+    if (!beast?.unlocked) return { msg: "Fera não desbloqueada.", state: this.status() };
+    if (!beast.ready) return { msg: "Fera já usada neste mapa.", state: this.status() };
+
+    const dmg = 80 + gameState.map * 15;
+    const targets = gameState.enemies.slice(0, 3);
+    targets.forEach(t => {
+      t.hp -= dmg;
+      log.push(`Fera gigante causou ${dmg} em ${t.name}!`);
+    });
+    gameState.enemies = gameState.enemies.filter(t => t.hp > 0);
+    gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + 120);
+
+    beast.ready = false;
+    beast.activeTurns = 2;
+    gameState.hero.beast = beast;
+    log.push("Fera invocada! Pronta novamente no próximo mapa.");
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Fera invocada.", state: this.status() };
+  }
+
   upgradeArmory(type) {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
@@ -613,6 +648,13 @@ class GameEngine {
       gameState.log = [...log, ...gameState.log].slice(0, 10);
       return gameState;
     }
+
+    // decaimento de buffs e itens raros
+    const rare = gameState.vault.rare || [];
+    ["ringPowerTurns", "bookTurns", "armorTurns", "hasteTurns"].forEach(k => {
+      if (gameState.effects[k] && gameState.effects[k] > 0) gameState.effects[k] -= 1;
+    });
+    rare.forEach(r => { if (r.activeTurns && r.activeTurns > 0) r.activeTurns -= 1; });
 
     if (gameState.hero && gameState.hero.cooldown > 0) {
       gameState.hero.cooldown -= 1;
@@ -665,10 +707,14 @@ class GameEngine {
     }
 
     const research = gameState.research || { tower: 0, troop: 0, siege: 0, defense: 0 };
-    const towerMult = 1 + 0.05 * research.tower + (gameState.runes?.power || 0) * 0.02 + (gameState.mapLayout?.effects?.towerBuff || 0);
-    const troopMult = 1 + 0.05 * research.troop;
+    const ringBuff = gameState.effects.ringPowerTurns > 0 ? 0.2 : 0;
+    const bookBuff = gameState.effects.bookTurns > 0 ? 0.15 : 0;
+    const armorBuff = gameState.effects.armorTurns > 0 ? 10 : 0;
+    const hasteDebuff = gameState.effects.hasteTurns > 0 ? 0.85 : 1;
+    const towerMult = 1 + 0.05 * research.tower + (gameState.runes?.power || 0) * 0.02 + (gameState.mapLayout?.effects?.towerBuff || 0) + ringBuff;
+    const troopMult = (1 + 0.05 * research.troop + bookBuff);
     const siegeMult = 1 + 0.05 * research.siege;
-    const defenseMult = gameState.castle.defense_bonus + (research.defense * 2) + (gameState.runes?.guard || 0) * 0.5;
+    const defenseMult = gameState.castle.defense_bonus + armorBuff + (research.defense * 2) + (gameState.runes?.guard || 0) * 0.5;
 
     const applyDamage = (enemy, rawDamage, sourceType) => {
       if (!enemy) return 0;
@@ -756,7 +802,7 @@ class GameEngine {
     const defenseTotal = defenseMult + extraDefense + runeDefense + (gameState.effects.castleShield ? 10 : 0);
 
     for (const enemy of gameState.enemies) {
-      let enemyAttack = enemy.attack * slowFactor;
+      let enemyAttack = enemy.attack * slowFactor * hasteDebuff;
       if (enemy.boss) enemyAttack *= 1.1;
       if (gameState.effects.enemyWeakTurns > 0) {
         enemyAttack = Math.round(enemyAttack * 0.7);
@@ -829,6 +875,14 @@ class GameEngine {
     if (enemy.boss) {
       unlock("armor");
       unlock("ring");
+      unlock("book");
+      unlock("haste");
+    } else if (enemy.role === "tank") {
+      unlock("armor");
+    } else if (enemy.role === "support") {
+      unlock("book");
+    } else if (enemy.role === "flyer") {
+      unlock("haste");
     }
   }
 

@@ -15,7 +15,8 @@ import {
   applyRune,
   collectTreasure,
   consumePotion,
-  useRareItem,
+  useRareItem as consumeRareItem,
+  summonBeast,
   healCastle,
   resetGame,
   nextMap,
@@ -143,7 +144,12 @@ export function useGame() {
   }
 
   async function runUseRareItem(type) {
-    const data = await useRareItem(type);
+    const data = await consumeRareItem(type);
+    updateFrom(data);
+  }
+
+  async function runSummonBeast() {
+    const data = await summonBeast();
     updateFrom(data);
   }
 
@@ -196,6 +202,7 @@ export function useGame() {
     runCollectTreasure,
     runUsePotion,
     runUseRareItem,
+    runSummonBeast,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,

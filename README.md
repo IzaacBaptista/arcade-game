@@ -121,8 +121,9 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 ### 🧩 UI / HUD / Qualidade de Vida
 - Log fixo na lateral com agrupamento de eventos
 - HUD de status (turno, fase, mapa, streak, buffs/debuffs, evento) + timeline de ação
-- Conselheiro IA com dicas contextuais
-- Modal de tesouros/poções e baú com joias
+- Conselheiro IA com dicas contextuais e toggle ON/OFF
+- Modal de tesouros/poções/itens raros com barras de duração; baú com joias
+- Mapas trocam visual por bioma; obstáculos/buffs/debuffs exibidos
 
 ### 🏹 Torres
 - Construção de novas torres
@@ -166,8 +167,10 @@ Mecânica a cada turno:
 - Custos dinâmicos por fase/mapa e mapa com efeitos (ralentamento/buff)
 
 ### 🎒 Tesouros & Poções
-- Baú com joias, artefatos (placeholder) e poções (cura, energia, saque)
-- Modal para abrir baú e consumir itens
+- Baú com joias, artefatos (placeholder), poções (cura, energia, saque) e itens raros
+- Itens raros: Anel de Poder, Grimório, Armadura Sagrada, Relógio Arcano (efeitos temporários)
+- Fera gigante invocável 1x por mapa (unlock por progressão)
+- Modal para abrir baú, consumir itens e ver duração
 
 ### 🔄 Reset / Mapa
 - Reset do jogo a qualquer momento
@@ -213,6 +216,7 @@ Você pode substituir quando quiser por prints reais do seu jogo.
 - Economia expandida (ouro, madeira, comida, energia, pedra, ferro, população) e coleta via construtores
 - Log de eventos com histórico e agrupamento
 - Persistência por usuário (Postgres) com auth JWT
+- XP acumulado para ranking futuro, buffs raros com duração, invocação de fera por mapa
 
 ---
 

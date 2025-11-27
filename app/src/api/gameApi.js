@@ -126,6 +126,11 @@ export async function useRareItem(type) {
   return res.json();
 }
 
+export async function summonBeast() {
+  const res = await fetch(`${API_URL}/hero/beast`, { method: "POST", headers: authHeaders() });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST", headers: authHeaders() });
   return res.json();

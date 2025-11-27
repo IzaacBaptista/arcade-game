@@ -39,6 +39,7 @@ export default function Game() {
     runHealCastle,
     runCastSpell,
     runApplyRune,
+    runSummonBeast,
     runCollectTreasure,
     runUsePotion,
     runUseRareItem,
@@ -208,6 +209,33 @@ export default function Game() {
     return tips.slice(0, 4);
   })();
 
+  const effectsActive = (() => {
+    const eff = state.effects || {};
+    const rare = [];
+    if (eff.ringPowerTurns > 0) rare.push({ label: "Anel ativo", turns: eff.ringPowerTurns, icon: "💍" });
+    if (eff.bookTurns > 0) rare.push({ label: "Grimório ativo", turns: eff.bookTurns, icon: "📜" });
+    if (eff.armorTurns > 0) rare.push({ label: "Armadura ativa", turns: eff.armorTurns, icon: "🛡️" });
+    if (eff.hasteTurns > 0) rare.push({ label: "Relógio ativo", turns: eff.hasteTurns, icon: "⏳" });
+    if (state.hero?.beast?.activeTurns > 0) {
+      rare.push({ label: "Fera ativa", turns: state.hero.beast.activeTurns, icon: "🐉" });
+    }
+    return rare;
+  })();
+
+  const mapStyle = (() => {
+    const name = (state.mapLayout?.name || "").toLowerCase();
+    if (name.includes("gelad")) {
+      return { background: "linear-gradient(180deg, #e8f4ff, #d0e4f9)" };
+    }
+    if (name.includes("deserto") || name.includes("cânion")) {
+      return { background: "linear-gradient(180deg, #f8e3b0, #f0c98a)" };
+    }
+    if (name.includes("floresta")) {
+      return { background: "linear-gradient(180deg, #d9f2c6, #bfe4a7)" };
+    }
+    return {};
+  })();
+
   async function handleAuthSubmit(e) {
     e.preventDefault();
     const fn = authForm.mode === "login" ? login : register;
@@ -269,6 +297,11 @@ export default function Game() {
             <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
               {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
             </button>
+            {state.hero?.beast?.unlocked && (
+              <button className="ks-btn primary" onClick={runSummonBeast} disabled={!state.hero.beast.ready}>
+                Invocar fera {state.hero.beast.ready ? "" : "(já usada)"}
+              </button>
+            )}
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
@@ -314,6 +347,7 @@ export default function Game() {
             <span className="ks-pill soft">Fase {stage}</span>
             <span className="ks-pill soft">Mapa {map}</span>
             <span className="ks-pill soft">Streak {state.achievements?.winStreak ?? 0}</span>
+            <span className="ks-pill gold">XP {state.xp ?? 0}</span>
             <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
             <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
@@ -338,6 +372,19 @@ export default function Game() {
               ))}
             </div>
           )}
+          {effectsActive.length > 0 && (
+            <div className="ks-helper">
+              <h3>Itens ativos</h3>
+              <div className="ks-effect-grid">
+                {effectsActive.map((e, idx) => (
+                  <div key={idx} className="ks-effect-chip">
+                    <span>{e.icon} {e.label}</span>
+                    <span className="ks-mini-label">{e.turns} turnos</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="ks-panel map-panel">
@@ -354,6 +401,7 @@ export default function Game() {
           </div>
 
           <div className="ks-map">
+            <div className="ks-map-overlay" style={mapStyle}></div>
             <div className="ks-obstacles">
               {(state.mapLayout?.effects?.obstacles || []).map((obs, idx) => (
                 <span key={idx} className="ks-tag">

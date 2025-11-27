@@ -97,6 +97,10 @@ module.exports = {
     return withUserState(req, res, () => GameEngine.useRareItem(type));
   },
 
+  summonBeast(req, res) {
+    return withUserState(req, res, () => GameEngine.summonBeast());
+  },
+
   addTower(req, res) {
     return withUserState(req, res, () => GameEngine.addTower());
   },

@@ -71,6 +71,8 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
           {rareData.map(r => {
             const item = rare.find(x => x.key === r.key) || {};
             const active = item.activeTurns > 0;
+            const maxTurns = r.key === "haste" ? 2 : 3;
+            const pct = active ? Math.max(0, Math.min(100, (item.activeTurns / maxTurns) * 100)) : 0;
             return (
               <div key={r.key} className="ks-card" title={item.desc || ""}>
                 <div className="ks-card-head">
@@ -83,7 +85,7 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
                 <p className="ks-subtitle">{item.desc || "Item raro"}</p>
                 {active && (
                   <div className="ks-bar small">
-                    <div className="ks-bar-fill" style={{ width: `${(item.activeTurns / (r.key === "haste" ? 2 : 3)) * 100}%` }} />
+                    <div className="ks-bar-fill" style={{ width: `${pct}%` }} />
                   </div>
                 )}
                 <div className="ks-card-actions">

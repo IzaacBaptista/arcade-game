@@ -44,7 +44,8 @@ const initialState = {
   hero: {
     name: "Aurora",
     charges: 2,
-    cooldown: 0
+    cooldown: 0,
+    beast: { unlocked: false, ready: true, activeTurns: 0 }
   },
 
   effects: {
