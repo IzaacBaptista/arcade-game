@@ -1,114 +1,110 @@
 const GameEngine = require("../services/GameEngine");
+const { getSave, saveState, freshState } = require("../services/saveStore");
+
+async function withUserState(req, res, action) {
+  const userId = req.userId;
+  let stored = await getSave(userId);
+  if (!stored) {
+    stored = freshState();
+    await saveState(userId, stored);
+  }
+  GameEngine.setState(stored);
+  const result = await action();
+  await saveState(userId, GameEngine.state());
+  return res.json(result);
+}
 
 module.exports = {
   start(req, res) {
-    return res.json(GameEngine.startGame());
+    return withUserState(req, res, () => GameEngine.startGame());
   },
 
   status(req, res) {
-    return res.json(GameEngine.status());
+    return withUserState(req, res, () => GameEngine.status());
   },
 
   nextTurn(req, res) {
-    return res.json(GameEngine.nextTurn());
+    return withUserState(req, res, () => GameEngine.nextTurn());
   },
 
   upgradeTower(req, res) {
-    const result = GameEngine.upgradeTower(Number(req.params.id));
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.upgradeTower(Number(req.params.id)));
   },
 
   trainTroops(req, res) {
     const { type, amount } = req.body;
-    const result = GameEngine.trainTroops(type, amount);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.trainTroops(type, amount));
   },
 
   upgradeTroops(req, res) {
     const { type } = req.body;
-    const result = GameEngine.upgradeTroops(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.upgradeTroops(type));
   },
 
   upgradeResearch(req, res) {
     const { type } = req.body;
-    const result = GameEngine.upgradeResearch(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.upgradeResearch(type));
   },
 
   collect(req, res) {
-    const result = GameEngine.collectResources();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.collectResources());
   },
 
   collectBuilders(req, res) {
-    const result = GameEngine.collectBuilders();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.collectBuilders());
   },
 
   hireBuilders(req, res) {
     const { amount = 1 } = req.body || {};
-    const result = GameEngine.hireBuilders(Number(amount) || 1);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.hireBuilders(Number(amount) || 1));
   },
 
   heal(req, res) {
-    const result = GameEngine.healCastle();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.healCastle());
   },
 
   castSpell(req, res) {
     const { type } = req.body;
-    const result = GameEngine.castSpell(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.castSpell(type));
   },
 
   buildArmory(req, res) {
     const { type, amount = 1 } = req.body;
-    const result = GameEngine.buildArmory(type, Number(amount) || 1);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.buildArmory(type, Number(amount) || 1));
   },
 
   upgradeArmory(req, res) {
     const { type } = req.body;
-    const result = GameEngine.upgradeArmory(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.upgradeArmory(type));
   },
 
   applyRune(req, res) {
     const { type } = req.body;
-    const result = GameEngine.applyRune(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.applyRune(type));
   },
 
   collectTreasure(req, res) {
-    const result = GameEngine.collectTreasure();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.collectTreasure());
   },
 
   usePotion(req, res) {
     const { type } = req.body;
-    const result = GameEngine.usePotion(type);
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.usePotion(type));
   },
 
   addTower(req, res) {
-    const result = GameEngine.addTower();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.addTower());
   },
 
   upgradeWall(req, res) {
-    const result = GameEngine.upgradeWall();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.upgradeWall());
   },
 
   reset(req, res) {
-    const result = GameEngine.resetGame();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.resetGame());
   },
 
   nextMap(req, res) {
-    const result = GameEngine.nextMap();
-    return res.json(result);
+    return withUserState(req, res, () => GameEngine.nextMap());
   }
 };

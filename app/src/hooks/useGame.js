@@ -14,7 +14,7 @@ import {
   castSpell,
   applyRune,
   collectTreasure,
-  usePotion,
+  consumePotion,
   healCastle,
   resetGame,
   nextMap,
@@ -25,17 +25,26 @@ import {
 export function useGame() {
   const [state, setState] = useState(null);
   const [loading] = useState(false);
+  const [token, setToken] = useState(() => localStorage.getItem("kingshot-token") || null);
 
   useEffect(() => {
-    const saved = loadSaved();
+    if (!token) {
+      setState(null);
+      return;
+    }
+    const saved = loadSaved(true);
     if (saved) {
       setState(saved);
     } else {
       loadStatus();
     }
-  }, []);
+  }, [token]);
 
   function updateFrom(data) {
+    if (data?.msg && `${data.msg}`.toLowerCase().includes("não autenticado")) {
+      setState(null);
+      return;
+    }
     const next = data?.state ?? data;
     setState(next);
     try {
@@ -43,7 +52,8 @@ export function useGame() {
     } catch (_) {}
   }
 
-  function loadSaved() {
+  function loadSaved(requireToken = false) {
+    if (requireToken && !token) return null;
     try {
       const raw = localStorage.getItem("kingshot-save");
       if (raw) return JSON.parse(raw);
@@ -127,7 +137,7 @@ export function useGame() {
   }
 
   async function runUsePotion(type) {
-    const data = await usePotion(type);
+    const data = await consumePotion(type);
     updateFrom(data);
   }
 
@@ -154,6 +164,9 @@ export function useGame() {
   return {
     state,
     loading,
+    token,
+    setToken,
+    loadStatus,
     loadSaved,
     runNextTurn,
     runUpgradeTower,

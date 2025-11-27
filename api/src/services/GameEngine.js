@@ -7,7 +7,13 @@ class GameEngine {
     this.mapLayouts = [
       { name: "Vale Sereno", paths: 2, effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] } },
       { name: "Desfiladeiro Sombrio", paths: 3, effects: { enemySlow: 0.12, towerBuff: 0.0, obstacles: ["neblina", "raízes"] } },
-      { name: "Ruínas Antigas", paths: 2, effects: { enemySlow: 0.04, towerBuff: 0.1, obstacles: ["ruína", "estátua"] } }
+      { name: "Ruínas Antigas", paths: 2, effects: { enemySlow: 0.04, towerBuff: 0.1, obstacles: ["ruína", "estátua"] } },
+      { name: "Floresta Encantada", paths: 4, effects: { enemySlow: 0.1, towerBuff: 0.03, obstacles: ["árvores", "lama"] } },
+      { name: "Montanhas Geladas", paths: 3, effects: { enemySlow: 0.15, towerBuff: 0.0, obstacles: ["gelo", "neblina"] } },
+      { name: "Pântano Nebuloso", paths: 2, effects: { enemySlow: 0.2, towerBuff: 0.0, obstacles: ["lama", "neblina"] } },
+      { name: "Deserto Escaldante", paths: 3, effects: { enemySlow: 0.05, towerBuff: 0.07, obstacles: ["areia", "rochas"] } },
+      { name: "Cânion Ardente", paths: 3, effects: { enemySlow: 0.07, towerBuff: 0.05, obstacles: ["rochas", "fumaça"] } },
+      { name: "Planície Ventosa", paths: 2, effects: { enemySlow: 0.03, towerBuff: 0.08, obstacles: ["grama", "pedras"] } }
     ];
   }
 
@@ -759,6 +765,14 @@ class GameEngine {
     gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + heal);
 
     log.push(`${enemy.name} derrubado! +${energyGain} energia e +${heal} vida para o castelo.`);
+  }
+
+  setState(stateObj) {
+    Object.assign(gameState, JSON.parse(JSON.stringify(stateObj)));
+  }
+
+  state() {
+    return gameState;
   }
 }
 

@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const GameController = require("../controllers/GameController");
+const { requireAuth } = require("../middleware/requireAuth");
+
+router.use(requireAuth);
 
 router.post("/start", GameController.start);
 router.get("/status", GameController.status);

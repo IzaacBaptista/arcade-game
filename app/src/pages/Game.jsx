@@ -8,6 +8,7 @@ import Builders from "../components/Builders";
 import Barracks from "../components/Barracks";
 import Vault from "../components/Vault";
 import VaultModal from "../components/VaultModal";
+import { login, register } from "../api/gameApi";
 
 import { useGame } from "../hooks/useGame";
 
@@ -15,10 +16,13 @@ export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
   const [autoStatus, setAutoStatus] = useState("Auto parado");
   const [vaultOpen, setVaultOpen] = useState(false);
+  const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
   const {
     state,
     loading,
+    token,
+    setToken,
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
@@ -39,6 +43,7 @@ export default function Game() {
     runResetGame,
     runNextMap,
     loadSaved,
+    loadStatus,
   } = useGame();
 
   useEffect(() => {
@@ -92,30 +97,87 @@ export default function Game() {
   }
 
   if (loading || !state) {
-    return <div className="ks-loading">Carregando as defesas...</div>;
+    return (
+      <div className="kingshot-shell">
+        <div className="ks-layout" style={{ maxWidth: 480 }}>
+          <div className="ks-panel">
+            <h2>Login</h2>
+            <form onSubmit={handleAuthSubmit} className="ks-auth-form">
+              <input
+                type="email"
+                placeholder="Email"
+                value={authForm.email}
+                onChange={e => setAuthForm({ ...authForm, email: e.target.value })}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Senha"
+                value={authForm.password}
+                onChange={e => setAuthForm({ ...authForm, password: e.target.value })}
+                required
+              />
+              <div className="ks-inline-actions">
+                <button className="ks-btn primary" type="submit">
+                  {authForm.mode === "login" ? "Entrar" : "Registrar"}
+                </button>
+                <button
+                  className="ks-btn ghost"
+                  type="button"
+                  onClick={() =>
+                    setAuthForm({
+                      ...authForm,
+                      mode: authForm.mode === "login" ? "register" : "login",
+                      message: ""
+                    })
+                  }
+                >
+                  Mudar para {authForm.mode === "login" ? "Registrar" : "Login"}
+                </button>
+              </div>
+              {authForm.message && <div className="ks-alert">{authForm.message}</div>}
+            </form>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const {
-    castle,
-    towers,
-    troops,
-    enemies,
-    log,
-    stage,
-    turn,
-    map,
-    status,
+    castle = { hp: 0, max_hp: 0 },
+    towers = [],
+    troops = {},
+    enemies = [],
+    log = [],
+    stage = 1,
+    turn = 1,
+    map = 1,
+    status = "ongoing",
     resources = {},
     builders = { qty: 0, efficiency: 1 },
     armory = {},
     research = { tower: 0, troop: 0, siege: 0, defense: 0 },
     hero = { name: "Herói", charges: 0, cooldown: 0 },
     vault = { jewels: 0, potions: {} },
-  } = state;
+  } = state || {};
 
   const gameOver = status === "over";
   const gameWon = status === "won";
   const isActive = status === "ongoing";
+
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+    const fn = authForm.mode === "login" ? login : register;
+    const res = await fn(authForm.email, authForm.password);
+    if (res.token) {
+      localStorage.setItem("kingshot-token", res.token);
+      setToken(res.token);
+      setAuthForm({ ...authForm, message: "Autenticado!" });
+      loadStatus();
+    } else {
+      setAuthForm({ ...authForm, message: res.msg || "Erro" });
+    }
+  }
 
   return (
     <div className="ks-layout">
@@ -199,7 +261,7 @@ export default function Game() {
             <div>
               <p className="ks-eyebrow">Mapa de batalha</p>
               <h2>Perímetro de defesa</h2>
-              <p className="ks-subtitle">Layout: {state.mapLayout?.name} • Rotas: {state.mapLayout?.paths} • Obstáculos: {(state.mapLayout?.effects?.obstacles || []).join(", ")}</p>
+              <p className="ks-subtitle"> {state.mapLayout?.name} • Rotas: {state.mapLayout?.paths} • Obstáculos: {(state.mapLayout?.effects?.obstacles || []).join(", ")}</p>
             </div>
             <div className="ks-badges">
               <span className="ks-badge">Torres: {towers.length}</span>

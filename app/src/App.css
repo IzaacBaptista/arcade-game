@@ -502,6 +502,18 @@
   color: #215a23;
 }
 
+.ks-auth-form {
+  display: grid;
+  gap: 10px;
+}
+
+.ks-auth-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(196, 155, 59, 0.5);
+  background: #fff;
+}
+
 .enemy-card.boss {
   border-color: #c44fff;
   box-shadow: 0 0 18px rgba(196, 79, 255, 0.4);
