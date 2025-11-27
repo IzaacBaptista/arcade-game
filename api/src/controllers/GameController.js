@@ -81,6 +81,17 @@ module.exports = {
     return res.json(result);
   },
 
+  collectTreasure(req, res) {
+    const result = GameEngine.collectTreasure();
+    return res.json(result);
+  },
+
+  usePotion(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.usePotion(type);
+    return res.json(result);
+  },
+
   addTower(req, res) {
     const result = GameEngine.addTower();
     return res.json(result);

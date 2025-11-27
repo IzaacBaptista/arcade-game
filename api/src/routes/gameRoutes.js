@@ -17,6 +17,8 @@ router.post("/spell/cast", GameController.castSpell);
 router.post("/armory/build", GameController.buildArmory);
 router.post("/armory/upgrade", GameController.upgradeArmory);
 router.post("/rune/apply", GameController.applyRune);
+router.post("/vault/collect", GameController.collectTreasure);
+router.post("/vault/potion", GameController.usePotion);
 router.post("/tower/add", GameController.addTower);
 router.post("/castle/wall/upgrade", GameController.upgradeWall);
 router.post("/reset", GameController.reset);

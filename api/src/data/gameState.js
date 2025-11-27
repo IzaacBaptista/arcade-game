@@ -55,6 +55,12 @@ const initialState = {
     daily: { collectGoal: 3, collectProgress: 0, completed: false }
   },
 
+  vault: {
+    jewels: 50,
+    artifacts: [],
+    potions: { heal: 2, energy: 2, loot: 1 }
+  },
+
   mapLayout: {
     name: "Vale Sereno",
     paths: 2,

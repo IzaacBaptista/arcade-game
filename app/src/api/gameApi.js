@@ -96,6 +96,20 @@ export async function applyRune(type) {
   return res.json();
 }
 
+export async function collectTreasure() {
+  const res = await fetch(`${API_URL}/vault/collect`, { method: "POST" });
+  return res.json();
+}
+
+export async function usePotion(type) {
+  const res = await fetch(`${API_URL}/vault/potion`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST" });
   return res.json();

@@ -187,6 +187,16 @@
   box-shadow: 0 18px 40px rgba(28, 17, 7, 0.25);
 }
 
+.ks-obstacles {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
 .ks-map::before {
   content: "";
   position: absolute;
@@ -246,6 +256,41 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
+}
+
+.ks-vault-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ks-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+
+.ks-modal {
+  background: #fffaf0;
+  border: 1px solid rgba(226, 207, 159, 0.8);
+  border-radius: 16px;
+  padding: 18px;
+  width: min(900px, 90vw);
+  max-height: 80vh;
+  overflow: auto;
+  box-shadow: 0 18px 48px rgba(36, 23, 6, 0.3);
+}
+
+.ks-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .ks-card {
@@ -476,8 +521,8 @@
 .ks-tag {
   padding: 4px 8px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(226,207,159,0.6);
 }
 
 .ks-tag.gold {

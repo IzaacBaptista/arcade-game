@@ -13,6 +13,8 @@ import {
   upgradeResearch,
   castSpell,
   applyRune,
+  collectTreasure,
+  usePotion,
   healCastle,
   resetGame,
   nextMap,
@@ -102,6 +104,16 @@ export function useGame() {
     updateFrom(data);
   }
 
+  async function runCollectTreasure() {
+    const data = await collectTreasure();
+    updateFrom(data);
+  }
+
+  async function runUsePotion(type) {
+    const data = await usePotion(type);
+    updateFrom(data);
+  }
+
   async function runBuildArmory(type, amount) {
     const data = await buildArmory(type, amount);
     updateFrom(data);
@@ -138,6 +150,8 @@ export function useGame() {
     runHealCastle,
     runCastSpell,
     runApplyRune,
+    runCollectTreasure,
+    runUsePotion,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,

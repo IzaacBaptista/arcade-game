@@ -18,6 +18,7 @@ class GameEngine {
       fresh.map = gameState.map + 1;
     }
     fresh.mapLayout = this.pickLayout(fresh.map);
+    fresh.vault = { jewels: Math.max(30, initialState.vault.jewels - 10 + fresh.map * 5), artifacts: [], potions: { heal: 2, energy: 2, loot: 1 } };
     Object.assign(gameState, fresh);
   }
 
@@ -486,6 +487,53 @@ class GameEngine {
     log.push(`Runa ${type} aplicada (Lv ${gameState.runes[type]}).`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
     return { msg: "Runa aplicada.", state: this.status() };
+  }
+
+  collectTreasure() {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const gainJewels = 10 + gameState.map * 3;
+    const gainGold = 25 + gameState.stage * 5;
+    const gainWood = 15 + gameState.stage * 3;
+
+    gameState.vault.jewels += gainJewels;
+    gameState.resources.gold += gainGold;
+    gameState.resources.wood += gainWood;
+
+    log.push(`Baú: +${gainJewels} joias, +${gainGold} ouro, +${gainWood} madeira.`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Tesouro coletado.", state: this.status() };
+  }
+
+  usePotion(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    const potions = gameState.vault.potions || {};
+    if (!potions[type] || potions[type] <= 0) {
+      return { msg: "Sem poção disponível.", state: this.status() };
+    }
+
+    potions[type] -= 1;
+    if (type === "heal") {
+      const heal = 180;
+      gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + heal);
+      log.push(`Poção de cura: +${heal} HP no castelo.`);
+    } else if (type === "energy") {
+      const energy = 80;
+      gameState.resources.energy += energy;
+      log.push(`Poção de energia: +${energy} energia.`);
+    } else if (type === "loot") {
+      const gold = 60;
+      const wood = 40;
+      gameState.resources.gold += gold;
+      gameState.resources.wood += wood;
+      log.push(`Poção de saque: +${gold} ouro, +${wood} madeira.`);
+    }
+
+    gameState.vault.potions = potions;
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Poção usada.", state: this.status() };
   }
 
   upgradeArmory(type) {

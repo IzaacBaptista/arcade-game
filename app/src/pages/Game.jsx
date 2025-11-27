@@ -6,12 +6,15 @@ import Enemies from "../components/Enemies";
 import Log from "../components/Log";
 import Builders from "../components/Builders";
 import Barracks from "../components/Barracks";
+import Vault from "../components/Vault";
+import VaultModal from "../components/VaultModal";
 
 import { useGame } from "../hooks/useGame";
 
 export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
   const [autoStatus, setAutoStatus] = useState("Auto parado");
+  const [vaultOpen, setVaultOpen] = useState(false);
   const autoTimer = useRef(null);
   const {
     state,
@@ -29,6 +32,8 @@ export default function Game() {
     runHealCastle,
     runCastSpell,
     runApplyRune,
+    runCollectTreasure,
+    runUsePotion,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,
@@ -104,6 +109,7 @@ export default function Game() {
     armory = {},
     research = { tower: 0, troop: 0, siege: 0, defense: 0 },
     hero = { name: "Herói", charges: 0, cooldown: 0 },
+    vault = { jewels: 0, potions: {} },
   } = state;
 
   const gameOver = status === "over";
@@ -195,6 +201,11 @@ export default function Game() {
           </div>
 
           <div className="ks-map">
+            <div className="ks-obstacles">
+              {(state.mapLayout?.effects?.obstacles || []).map((obs, idx) => (
+                <span key={idx} className="ks-tag">{obs}</span>
+              ))}
+            </div>
             <div className="ks-map-ring ring-1" />
             <div className="ks-map-ring ring-2" />
             <div className="ks-map-ring ring-3" />
@@ -240,6 +251,9 @@ export default function Game() {
           <div style={{ marginTop: 12 }}>
             <Builders builders={builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
           </div>
+          <div className="ks-inline-actions" style={{ marginTop: 12 }}>
+            <Vault vault={vault} onCollect={runCollectTreasure} onUse={runUsePotion} onOpen={() => setVaultOpen(true)} />
+          </div>
         </section>
 
         <section className="ks-panel troops-panel">
@@ -266,16 +280,24 @@ export default function Game() {
           />
         </section>
 
-        <section className="ks-panel log-panel">
-          <div className="ks-panel-header">
-            <div>
-              <p className="ks-eyebrow">Inteligência</p>
-              <h2>Relatório</h2>
-            </div>
+      <section className="ks-panel log-panel">
+        <div className="ks-panel-header">
+          <div>
+            <p className="ks-eyebrow">Inteligência</p>
+            <h2>Relatório</h2>
           </div>
-          <Log log={log} />
-        </section>
-      </div>
+        </div>
+        <Log log={log} />
+      </section>
     </div>
-  );
+      {vaultOpen && (
+        <VaultModal
+          vault={vault}
+          onClose={() => setVaultOpen(false)}
+          onCollect={runCollectTreasure}
+          onUse={runUsePotion}
+        />
+      )}
+  </div>
+);
 }
