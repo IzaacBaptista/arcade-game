@@ -1,5 +1,7 @@
 export default function Castle({ castle }) {
   const hpPercent = Math.round((castle.hp / castle.max_hp) * 100);
+  const hpDisplay = Math.round(castle.hp);
+  const maxDisplay = Math.round(castle.max_hp);
 
   return (
     <div className="castle-card ks-card">
@@ -16,7 +18,7 @@ export default function Castle({ castle }) {
         <div className="ks-bar-fill" style={{ width: `${hpPercent}%` }} />
       </div>
       <div className="castle-stats">
-        <span>Vida {castle.hp} / {castle.max_hp}</span>
+        <span>Vida {hpDisplay} / {maxDisplay}</span>
         <span>Defesa +{castle.defense_bonus}%</span>
       </div>
     </div>

@@ -18,6 +18,7 @@ export default function Game() {
   const [vaultOpen, setVaultOpen] = useState(false);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
+  
   const {
     state,
     loading,
@@ -199,7 +200,7 @@ export default function Game() {
             <span className="ks-pill wood">🌲 Madeira {resources.wood ?? 0}</span>
             <span className="ks-pill energy">⚡ Energia {resources.energy ?? 0}</span>
             <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
-            <span className="ks-pill hp">❤️ {castle.hp} / {castle.max_hp}</span>
+            <span className="ks-pill hp">❤️ {Math.round(castle.hp)} / {castle.max_hp}</span>
             <span className="ks-pill soft" title="Streak de vitórias">🔥 Streak {state.achievements?.winStreak ?? 0}</span>
             <span className="ks-pill stone">🪨 Pedra {resources.stone ?? 0}</span>
             <span className="ks-pill iron">⛓️ Ferro {resources.iron ?? 0}</span>
