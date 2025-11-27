@@ -42,6 +42,8 @@ class GameEngine {
     const bossMultiplier = isBoss ? 3.2 : 1;
     const hp = Math.floor((baseHp + difficulty * 2) * bossMultiplier);
     const attack = Math.floor((baseAttack + difficulty * 1.5) * bossMultiplier);
+    const baseSpeed = role === "flyer" ? 10 : role === "support" ? 6 : role === "tank" ? 4 : 7;
+    const initiative = isBoss ? 2 : role === "flyer" ? 1 : 0;
 
     const resist = {
       tower: role === "tank" ? 0.75 : 1,
@@ -62,7 +64,9 @@ class GameEngine {
       boss: isBoss,
       role,
       resist,
-      shieldReady: isBoss
+      shieldReady: isBoss,
+      speed: baseSpeed,
+      initiative
     };
   }
 
@@ -676,6 +680,17 @@ class GameEngine {
     totalAttack += (siegeAttack * siegeMult) + (cavalryAttack * troopMult) + (infantryAttack * troopMult);
 
     if (gameState.enemies.length > 0 && totalAttack > 0) {
+      // calcula ordem por speed: flyers, tropas rápidas podem agir antes
+      const fastestEnemy = [...gameState.enemies].sort((a, b) => (b.speed || 0) - (a.speed || 0))[0];
+      if (fastestEnemy && (fastestEnemy.speed || 0) >= 9) {
+        // ataque pré-turno no castelo
+        const preDmg = Math.max(0, Math.round(fastestEnemy.attack * 0.8) - (gameState.castle.defense_bonus || 0));
+        if (preDmg > 0) {
+          gameState.castle.hp = Math.max(0, gameState.castle.hp - preDmg);
+          log.push(`${fastestEnemy.name} atacou primeiro e causou ${preDmg} no castelo!`);
+        }
+      }
+
       const target = gameState.enemies[0];
       const dealt = applyDamage(target, totalAttack, "troop");
       log.push(`Tropas causam ${dealt} em ${target.name}`);
@@ -695,11 +710,16 @@ class GameEngine {
 
     for (const enemy of gameState.enemies) {
       let enemyAttack = enemy.attack * slowFactor;
+      if (enemy.boss) enemyAttack *= 1.1;
       if (gameState.effects.enemyWeakTurns > 0) {
         enemyAttack = Math.round(enemyAttack * 0.7);
       }
       const dmg = Math.max(0, enemyAttack - defenseTotal);
       castleDamage += dmg;
+      if (enemy.boss) {
+        // chefe ataca duas vezes
+        castleDamage += Math.max(0, enemyAttack - defenseTotal);
+      }
     }
 
     if (gameState.effects.castleShield) {

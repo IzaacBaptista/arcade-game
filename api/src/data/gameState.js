@@ -82,8 +82,8 @@ const initialState = {
   ],
 
   troops: {
-    soldiers: { level: 1, qty: 10, attack: 2, hp: 10 },
-    archers: { level: 1, qty: 5, attack: 4, hp: 6 }
+    soldiers: { level: 1, qty: 10, attack: 2, hp: 10, speed: 5, crit: 5, critDmg: 150, armor: 2, pen: 1 },
+    archers: { level: 1, qty: 5, attack: 4, hp: 6, speed: 7, crit: 10, critDmg: 170, armor: 1, pen: 2 }
   },
 
   armory: {

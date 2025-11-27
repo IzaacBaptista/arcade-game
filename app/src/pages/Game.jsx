@@ -256,6 +256,17 @@ export default function Game() {
       )}
 
       <div className="ks-grid">
+        <section className="ks-panel hud-panel">
+          <div className="ks-pill-row">
+            <span className="ks-pill soft">Turno {turn}</span>
+            <span className="ks-pill soft">Fase {stage}</span>
+            <span className="ks-pill soft">Mapa {map}</span>
+            <span className="ks-pill soft">Streak {state.achievements?.winStreak ?? 0}</span>
+            <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
+            <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
+          </div>
+        </section>
+
         <section className="ks-panel map-panel">
           <div className="ks-panel-header">
             <div>
