@@ -11,7 +11,8 @@ Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**
 🎨 **Frontend**: React + CSS customizado  
 🧠 **Game Engine própria**: lógica de turnos, fases, torres, tropas e inimigos
 
-<img width="939" height="926" alt="image" src="https://github.com/user-attachments/assets/1550c6aa-3e67-472e-92eb-30c26afceacb" />
+<img width="1541" height="1452" alt="screencapture-localhost-3000-2025-11-27-09_10_29" src="https://github.com/user-attachments/assets/952c72bd-0bc2-4965-ad48-705c5d4e3316" />
+
 
 </div>
 
