@@ -24,6 +24,11 @@ const initialState = {
     efficiency: 1
   },
 
+  runes: {
+    power: 0,
+    guard: 0
+  },
+
   research: {
     tower: 0,
     troop: 0,
@@ -44,7 +49,16 @@ const initialState = {
 
   achievements: {
     winStreak: 0,
-    noDamageClear: false
+    noDamageClear: false,
+    totalWins: 0,
+    totalLosses: 0,
+    daily: { collectGoal: 3, collectProgress: 0, completed: false }
+  },
+
+  mapLayout: {
+    name: "Vale Sereno",
+    paths: 2,
+    effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] }
   },
 
   actionLocks: {

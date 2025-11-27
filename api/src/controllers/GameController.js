@@ -75,6 +75,12 @@ module.exports = {
     return res.json(result);
   },
 
+  applyRune(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.applyRune(type);
+    return res.json(result);
+  },
+
   addTower(req, res) {
     const result = GameEngine.addTower();
     return res.json(result);

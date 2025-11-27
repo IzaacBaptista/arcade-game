@@ -28,6 +28,7 @@ export default function Game() {
     runUpgradeWall,
     runHealCastle,
     runCastSpell,
+    runApplyRune,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,
@@ -154,6 +155,14 @@ export default function Game() {
             </button>
           </div>
           <div className="ks-inline-actions">
+            <button className="ks-btn ghost" title="Runa de poder: buff em torres" onClick={() => runApplyRune("power")} disabled={!isActive}>
+              Runa de poder (Lv {state.runes?.power ?? 0})
+            </button>
+            <button className="ks-btn ghost" title="Runa de guarda: defesa extra" onClick={() => runApplyRune("guard")} disabled={!isActive}>
+              Runa de guarda (Lv {state.runes?.guard ?? 0})
+            </button>
+          </div>
+          <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={runCollect} disabled={!isActive}>Coletar recursos</button>
             <button className="ks-btn ghost" onClick={runAddTower} disabled={!isActive}>Construir torre</button>
             <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
@@ -177,6 +186,7 @@ export default function Game() {
             <div>
               <p className="ks-eyebrow">Mapa de batalha</p>
               <h2>Perímetro de defesa</h2>
+              <p className="ks-subtitle">Layout: {state.mapLayout?.name} • Rotas: {state.mapLayout?.paths} • Obstáculos: {(state.mapLayout?.effects?.obstacles || []).join(", ")}</p>
             </div>
             <div className="ks-badges">
               <span className="ks-badge">Torres: {towers.length}</span>

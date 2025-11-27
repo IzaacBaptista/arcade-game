@@ -12,6 +12,7 @@ import {
   upgradeWall,
   upgradeResearch,
   castSpell,
+  applyRune,
   healCastle,
   resetGame,
   nextMap,
@@ -96,6 +97,11 @@ export function useGame() {
     updateFrom(data);
   }
 
+  async function runApplyRune(type) {
+    const data = await applyRune(type);
+    updateFrom(data);
+  }
+
   async function runBuildArmory(type, amount) {
     const data = await buildArmory(type, amount);
     updateFrom(data);
@@ -131,6 +137,7 @@ export function useGame() {
     runUpgradeWall,
     runHealCastle,
     runCastSpell,
+    runApplyRune,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,

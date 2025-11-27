@@ -4,6 +4,11 @@ const { gameState, initialState } = require("../data/gameState");
 class GameEngine {
   constructor() {
     this.enemySeq = 0;
+    this.mapLayouts = [
+      { name: "Vale Sereno", paths: 2, effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] } },
+      { name: "Desfiladeiro Sombrio", paths: 3, effects: { enemySlow: 0.12, towerBuff: 0.0, obstacles: ["neblina", "raízes"] } },
+      { name: "Ruínas Antigas", paths: 2, effects: { enemySlow: 0.04, towerBuff: 0.1, obstacles: ["ruína", "estátua"] } }
+    ];
   }
 
   resetState(keepMap = false) {
@@ -12,6 +17,7 @@ class GameEngine {
     if (keepMap) {
       fresh.map = gameState.map + 1;
     }
+    fresh.mapLayout = this.pickLayout(fresh.map);
     Object.assign(gameState, fresh);
   }
 
@@ -58,7 +64,9 @@ class GameEngine {
       "Goblin": "👺",
       "Ork": "🧌",
       "Lobo Ágil": "🐺",
-      "Chefe: Juggernaut": "👑"
+      "Chefe: Juggernaut": "👑",
+      "Batedor Alado": "🦅",
+      "Xamã": "🧙"
     };
     return map[name] || "👹";
   }
@@ -92,6 +100,11 @@ class GameEngine {
     }
 
     return enemies;
+  }
+
+  pickLayout(mapNumber) {
+    const idx = (mapNumber - 1) % this.mapLayouts.length;
+    return JSON.parse(JSON.stringify(this.mapLayouts[idx]));
   }
 
   ensureOngoing(log) {
@@ -454,6 +467,27 @@ class GameEngine {
     return { msg: "Produção concluída.", state: this.status() };
   }
 
+  applyRune(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    if (!["power", "guard"].includes(type)) return { msg: "Tipo de runa inválido.", state: this.status() };
+
+    const costGold = 60 + (gameState.runes[type] || 0) * 40;
+    const costEnergy = 35 + (gameState.runes[type] || 0) * 20;
+
+    if (gameState.resources.gold < costGold || gameState.resources.energy < costEnergy) {
+      return { msg: "Recursos insuficientes para runa.", state: this.status() };
+    }
+
+    gameState.resources.gold -= costGold;
+    gameState.resources.energy -= costEnergy;
+    gameState.runes[type] = (gameState.runes[type] || 0) + 1;
+
+    log.push(`Runa ${type} aplicada (Lv ${gameState.runes[type]}).`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Runa aplicada.", state: this.status() };
+  }
+
   upgradeArmory(type) {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
@@ -524,10 +558,10 @@ class GameEngine {
     }
 
     const research = gameState.research || { tower: 0, troop: 0, siege: 0, defense: 0 };
-    const towerMult = 1 + 0.05 * research.tower;
+    const towerMult = 1 + 0.05 * research.tower + (gameState.runes?.power || 0) * 0.02 + (gameState.mapLayout?.effects?.towerBuff || 0);
     const troopMult = 1 + 0.05 * research.troop;
     const siegeMult = 1 + 0.05 * research.siege;
-    const defenseMult = gameState.castle.defense_bonus + (research.defense * 2);
+    const defenseMult = gameState.castle.defense_bonus + (research.defense * 2) + (gameState.runes?.guard || 0) * 0.5;
 
     const applyDamage = (enemy, rawDamage, sourceType) => {
       if (!enemy) return 0;
@@ -602,10 +636,11 @@ class GameEngine {
     // inimigos atacam castelo
     let castleDamage = 0;
     const extraDefense = (armory.shields.qty * armory.shields.defense);
+    const slowFactor = 1 - (gameState.mapLayout?.effects?.enemySlow || 0);
     const defenseTotal = defenseMult + extraDefense + (gameState.effects.castleShield ? 10 : 0);
 
     for (const enemy of gameState.enemies) {
-      let enemyAttack = enemy.attack;
+      let enemyAttack = enemy.attack * slowFactor;
       if (gameState.effects.enemyWeakTurns > 0) {
         enemyAttack = Math.round(enemyAttack * 0.7);
       }

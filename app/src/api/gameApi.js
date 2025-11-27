@@ -87,6 +87,15 @@ export async function castSpell(type) {
   return res.json();
 }
 
+export async function applyRune(type) {
+  const res = await fetch(`${API_URL}/rune/apply`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST" });
   return res.json();
