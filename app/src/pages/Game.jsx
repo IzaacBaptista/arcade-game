@@ -23,6 +23,7 @@ export default function Game() {
     loading,
     token,
     setToken,
+    logout,
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
@@ -219,6 +220,9 @@ export default function Game() {
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={() => { const saved = loadSaved(); if (saved) setAutoMode(false); }}>
               Continuar sessão
+            </button>
+            <button className="ks-btn ghost" onClick={logout}>
+              Logout
             </button>
           </div>
           <div className="ks-inline-actions">

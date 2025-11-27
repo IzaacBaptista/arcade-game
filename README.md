@@ -97,21 +97,21 @@ http://localhost:3000
 ## 🎯 Funcionalidades Principais
 
 ### 🏰 Castelo
-- Vida, defesa e cura com energia + comida
-- Muralha com níveis
-- Defesa extra de escudos na fase de combate
+- Vida, defesa e cura com energia + comida (buffada por curandeiros/eventos)
+- Muralha com níveis e pesquisas de pedra/ferro
+- Defesa extra de escudos na fase de combate e runas de guarda
 - Ganha dano por turno se inimigos sobreviverem
 
 ### 🏹 Torres
 - Construção de novas torres
 - Upgrades de nível
-- Escala de dano por fase
+- Runas por torre (poder/guarda) e buffs de pesquisa
 
 ### ⚔️ Tropas
 - Tipos: soldiers e archers
-- Ataque coletivo por turno
+- Ataque coletivo por turno com speed/crit/armor/pen
 - Treinamento por recurso
-- Evolução de tropas (aumenta ATK / HP)
+- Evolução de tropas (aumenta ATK / HP / speed)
 
 ### 🪖 Construtores
 - Construtores coletam madeira, ouro e comida por ação dedicada
@@ -120,24 +120,32 @@ http://localhost:3000
 ### 🏛 Quartel & Arsenal
 - Fabricação e melhoria de: catapultas, canhões antigos, cavalos, cavalaria, escudos e lanças
 - Armas de cerco e cavalaria adicionam dano extra; escudos somam defesa do castelo
+- Runas aplicam buffs nas torres; pesquisas de cerco e engenharia aumentam dano
 
 ### 👹 Inimigos
 - HP, max HP (com barra), ícone, ataque, distância e recompensa em ouro
+- Roles: tanque, voador, suporte; chefes batem 2x e têm escudo
 - Orks e chefes concedem energia e cura ao morrer
-- Novos inimigos vão sendo desbloqueados por fase
+- Novos inimigos/mutações por mapa, mini-eventos por turno
 
 ### 🔁 Sistema de turnos
 Mecânica a cada turno:
 1. Torres atacam  
-2. Tropas + arsenal atacam  
+2. Tropas + arsenal atacam (ordem por speed)  
 3. Inimigos revidam (considerando escudos)  
-4. Castelo recebe dano residual  
-5. Recompensas por inimigos mortos
-6. Avança turno / fase
+4. Castelo recebe dano residual (boss ataca 2x, voadores podem agir antes)  
+5. Recompensas por inimigos mortos  
+6. Eventos/buffs/debuffs aplicados  
+7. Avança turno / fase
 
 ### 🪵 Recursos
-- Ouro, madeira, comida e energia coletáveis por ações (coleta padrão e coleta de construtores)
-- Custos dinâmicos por fase/mapa
+- Ouro, madeira, comida, energia, pedra, ferro, população
+- Coleta padrão e coleta de construtores (com retorno decrescente)
+- Custos dinâmicos por fase/mapa e mapa com efeitos (ralentamento/buff)
+
+### 🎒 Tesouros & Poções
+- Baú com joias, artefatos (placeholder) e poções (cura, energia, saque)
+- Modal para abrir baú e consumir itens
 
 ### 🔄 Reset / Mapa
 - Reset do jogo a qualquer momento
@@ -160,36 +168,41 @@ Você pode substituir quando quiser por prints reais do seu jogo.
 - `POST /game/troops/upgrade` — Evolui tropas (melhora ATK / HP).
 - `POST /game/castle/wall/upgrade` — Reforça a muralha do castelo.
 - `POST /game/castle/heal` — Cura o castelo usando energia + comida.
-- `POST /game/collect` — Coleta ouro, madeira, comida e energia.
+- `POST /game/collect` — Coleta ouro, madeira, comida, energia, pedra e ferro.
 - `POST /game/builders/collect` — Coleta recursos com construtores.
 - `POST /game/builders/hire` — Contrata novos construtores.
 - `POST /game/armory/build` — Fabrica itens do arsenal (catapultas, canhões, etc.).
 - `POST /game/armory/upgrade` — Melhora itens do arsenal.
+- `POST /game/rune/apply` — Aplica runas de poder/guarda.
+- `POST /game/vault/collect` — Coleta tesouro (joias/recursos).
+- `POST /game/vault/potion` — Usa poção (cura/energia/saque).
 - `POST /game/reset` — Reinicia toda a partida.
 - `POST /game/map/next` — Avança para o próximo mapa após vitória.
+- `POST /auth/register` — Cria usuário e save inicial.
+- `POST /auth/login` — Autentica e retorna token.
 
 ---
 
 ## 🧠 Mapa da Game Engine
-- Sistema de dano
-- Cálculo dinâmico de fases
-- Escalonamento de HP e ATK de inimigos (com ícone, recompensa e distância)
-- Lógica de batalha com torres, tropas, arsenal e defesa extra de escudos
-- Economia (ouro, madeira, comida, energia) e coleta via construtores
-- Log de eventos com histórico
+- Sistema de dano e ordem por speed/initiative
+- Cálculo dinâmico de fases + eventos aleatórios por turno
+- Escalonamento de HP e ATK de inimigos (com ícone, recompensa, distância, roles)
+- Lógica de batalha com torres, tropas, arsenal, runas e defesa extra de escudos
+- Economia expandida (ouro, madeira, comida, energia, pedra, ferro, população) e coleta via construtores
+- Log de eventos com histórico e agrupamento
+- Persistência por usuário (Postgres) com auth JWT
 
 ---
 
 ## 🚀 Roadmap
 Coisas já mapeadas para evolução:
 
-- Heroínas com habilidades especiais
-- Novos tipos de inimigos (chefe, rápido, tanque...)
-- Sistema de eventos aleatórios
+- Heroínas/feitiços avançados e tech tree profunda
+- Novos tipos de inimigos por bioma, mini-chefes e mutações
 - Modo sobrevivência infinito
-- Sistema de save/load com localStorage
+- Slots de runas por torre e árvore de pesquisa detalhada
 - Efeitos sonoros e animações
-- Modo mapa (tower defense grid)
+- Mapa em tiles (tower defense grid) com caminhos múltiplos
 - Pontuação global e ranking
 
 ---

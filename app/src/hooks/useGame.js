@@ -168,6 +168,12 @@ export function useGame() {
     setToken,
     loadStatus,
     loadSaved,
+    logout() {
+      setState(null);
+      setToken(null);
+      localStorage.removeItem("kingshot-token");
+      localStorage.removeItem("kingshot-save");
+    },
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
