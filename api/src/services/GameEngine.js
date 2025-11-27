@@ -1,3 +1,4 @@
+const { randomUUID } = require("crypto");
 const { gameState, initialState } = require("../data/gameState");
 
 class GameEngine {
@@ -25,16 +26,41 @@ class GameEngine {
   }
 
   buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false) {
-    this.enemySeq += 1;
     const bossMultiplier = isBoss ? 3.2 : 1;
+    const hp = Math.floor((baseHp + difficulty * 2) * bossMultiplier);
+    const attack = Math.floor((baseAttack + difficulty * 1.5) * bossMultiplier);
+
     return {
-      id: this.enemySeq,
+      id: randomUUID(),
       name,
-      hp: Math.round((baseHp + difficulty * 4) * bossMultiplier),
-      attack: Math.round((baseAttack + difficulty * 1.5) * bossMultiplier),
+      icon: this.getEnemyIcon(name),
+      hp,
+      max_hp: hp,
+      attack,
       distance,
+      reward: this.getEnemyReward(name, isBoss),
       boss: isBoss
     };
+  }
+
+  getEnemyIcon(name) {
+    const map = {
+      "Goblin": "👺",
+      "Ork": "🧌",
+      "Lobo Ágil": "🐺",
+      "Chefe: Juggernaut": "👑"
+    };
+    return map[name] || "👹";
+  }
+
+  getEnemyReward(name, isBoss) {
+    if (isBoss) return 50;
+    const baseRewards = {
+      "Goblin": 5,
+      "Ork": 10,
+      "Lobo Ágil": 8
+    };
+    return baseRewards[name] ?? 5;
   }
 
   generateEnemies(stage) {
@@ -376,8 +402,7 @@ class GameEngine {
 
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
-        gameState.resources.gold += 10;
-        this.rewardForEnemy(target, log);
+        this.grantEnemyRewards(target, log);
         gameState.enemies.shift();
       }
     }
@@ -408,8 +433,7 @@ class GameEngine {
 
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
-        gameState.resources.gold += 15;
-        this.rewardForEnemy(target, log);
+        this.grantEnemyRewards(target, log);
         gameState.enemies.shift();
       }
     }
@@ -451,6 +475,14 @@ class GameEngine {
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return gameState;
+  }
+
+  grantEnemyRewards(enemy, log) {
+    const goldGain = enemy.reward ?? 10;
+    gameState.resources.gold += goldGain;
+    log.push(`Recompensa: +${goldGain} ouro de ${enemy.name}.`);
+
+    this.rewardForEnemy(enemy, log);
   }
 
   rewardForEnemy(enemy, log) {

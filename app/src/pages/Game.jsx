@@ -43,7 +43,6 @@ export default function Game() {
     map,
     status,
     resources = {},
-    builders = { qty: 0, efficiency: 1 },
     armory = {},
   } = state;
 
@@ -68,8 +67,8 @@ export default function Game() {
           <div className="ks-pill-row">
             <span className="ks-pill gold">🪙 Ouro {resources.gold ?? 0}</span>
             <span className="ks-pill wood">🌲 Madeira {resources.wood ?? 0}</span>
-            <span className="ks-pill soft">⚡ Energia {resources.energy ?? 0}</span>
-            <span className="ks-pill soft">🥘 Comida {resources.food ?? 0}</span>
+            <span className="ks-pill energy">⚡ Energia {resources.energy ?? 0}</span>
+            <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
             <span className="ks-pill hp">❤️ {castle.hp} / {castle.max_hp}</span>
           </div>
         </div>
@@ -153,7 +152,7 @@ export default function Game() {
           <Troops troops={troops} onTrain={runTrainTroops} onUpgrade={runUpgradeTroops} />
         </section>
 
-        <section className="ks-panel troops-panel">
+        <section className="ks-panel barracks-panel">
           <div className="ks-panel-header">
             <div>
               <p className="ks-eyebrow">Quartel & Arsenal</p>
