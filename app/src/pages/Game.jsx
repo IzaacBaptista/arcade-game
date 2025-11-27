@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import Castle from "../components/Castle";
 import Towers from "../components/Towers";
 import Troops from "../components/Troops";
@@ -9,6 +10,9 @@ import Barracks from "../components/Barracks";
 import { useGame } from "../hooks/useGame";
 
 export default function Game() {
+  const [autoMode, setAutoMode] = useState(false);
+  const [autoStatus, setAutoStatus] = useState("Auto parado");
+  const autoTimer = useRef(null);
   const {
     state,
     loading,
@@ -28,6 +32,56 @@ export default function Game() {
     runNextMap,
   } = useGame();
 
+  useEffect(() => {
+    if (!state) return () => {};
+
+    const { castle, enemies, status } = state;
+    const isActive = status === "ongoing";
+
+    if (!autoMode) return () => {};
+
+    const lowHp = castle.hp <= castle.max_hp * 0.25;
+    const bossPresent = (enemies || []).some(e => e.boss);
+
+    if (!isActive) {
+      setAutoMode(false);
+      setAutoStatus("Auto pausado: batalha encerrada");
+      return () => {};
+    }
+
+    if (lowHp || bossPresent) {
+      setAutoMode(false);
+      setAutoStatus(lowHp ? "Auto pausado: HP < 25%" : "Auto pausado: BOSS em campo");
+      return () => {};
+    }
+
+    setAutoStatus("Auto rodando…");
+    autoTimer.current = setTimeout(() => {
+      runNextTurn();
+    }, 1200);
+
+    return () => {
+      if (autoTimer.current) clearTimeout(autoTimer.current);
+    };
+  }, [autoMode, state, runNextTurn]);
+
+  useEffect(() => () => {
+    if (autoTimer.current) clearTimeout(autoTimer.current);
+  }, []);
+
+  function toggleAuto() {
+    if (autoMode) {
+      setAutoMode(false);
+      setAutoStatus("Auto parado");
+      return;
+    }
+    if (!isActive) {
+      setAutoStatus("Auto indisponível: fora de batalha");
+      return;
+    }
+    setAutoMode(true);
+  }
+
   if (loading || !state) {
     return <div className="ks-loading">Carregando as defesas...</div>;
   }
@@ -43,6 +97,7 @@ export default function Game() {
     map,
     status,
     resources = {},
+    builders = { qty: 0, efficiency: 1 },
     armory = {},
   } = state;
 
@@ -77,6 +132,12 @@ export default function Game() {
             {isActive ? "Próximo turno" : "Ação indisponível"}
           </button>
           <span className="ks-mini-label">Antecipe ondas e fortaleça as torres.</span>
+          <div className="ks-inline-actions">
+            <button className={`ks-btn ${autoMode ? "primary" : "ghost"}`} onClick={toggleAuto}>
+              {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
+            </button>
+            <span className="ks-mini-label">{autoStatus}</span>
+          </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={runCollect} disabled={!isActive}>Coletar recursos</button>
             <button className="ks-btn ghost" onClick={runAddTower} disabled={!isActive}>Construir torre</button>
@@ -138,7 +199,7 @@ export default function Game() {
             <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
           </div>
           <div style={{ marginTop: 12 }}>
-            <Builders builders={state.builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
+            <Builders builders={builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
           </div>
         </section>
 
