@@ -525,6 +525,11 @@
   border: 1px solid rgba(226,207,159,0.6);
 }
 
+.ks-obstacle-icon {
+  font-size: 18px;
+  margin-left: 4px;
+}
+
 .ks-tag.gold {
   color: #f8d15c;
   border-color: rgba(248,183,60,0.4);

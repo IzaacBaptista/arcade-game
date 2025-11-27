@@ -27,11 +27,28 @@ export function useGame() {
   const [loading] = useState(false);
 
   useEffect(() => {
-    loadStatus();
+    const saved = loadSaved();
+    if (saved) {
+      setState(saved);
+    } else {
+      loadStatus();
+    }
   }, []);
 
   function updateFrom(data) {
-    setState(data?.state ?? data);
+    const next = data?.state ?? data;
+    setState(next);
+    try {
+      localStorage.setItem("kingshot-save", JSON.stringify(next));
+    } catch (_) {}
+  }
+
+  function loadSaved() {
+    try {
+      const raw = localStorage.getItem("kingshot-save");
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return null;
   }
 
   async function loadStatus() {
@@ -137,6 +154,7 @@ export function useGame() {
   return {
     state,
     loading,
+    loadSaved,
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,

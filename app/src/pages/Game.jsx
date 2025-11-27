@@ -38,6 +38,7 @@ export default function Game() {
     runUpgradeArmory,
     runResetGame,
     runNextMap,
+    loadSaved,
   } = useGame();
 
   useEffect(() => {
@@ -136,6 +137,7 @@ export default function Game() {
             <span className="ks-pill energy">⚡ Energia {resources.energy ?? 0}</span>
             <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
             <span className="ks-pill hp">❤️ {castle.hp} / {castle.max_hp}</span>
+            <span className="ks-pill soft" title="Streak de vitórias">🔥 Streak {state.achievements?.winStreak ?? 0}</span>
           </div>
         </div>
         <div className="ks-hero-actions">
@@ -148,6 +150,11 @@ export default function Game() {
               {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
             </button>
             <span className="ks-mini-label">{autoStatus}</span>
+          </div>
+          <div className="ks-inline-actions">
+            <button className="ks-btn ghost" onClick={() => { const saved = loadSaved(); if (saved) setAutoMode(false); }}>
+              Continuar sessão
+            </button>
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
@@ -203,7 +210,12 @@ export default function Game() {
           <div className="ks-map">
             <div className="ks-obstacles">
               {(state.mapLayout?.effects?.obstacles || []).map((obs, idx) => (
-                <span key={idx} className="ks-tag">{obs}</span>
+                <span key={idx} className="ks-tag">
+                  {obs}
+                  <span className="ks-obstacle-icon">
+                    {obs.includes("lama") ? "🪨" : obs.includes("neblina") ? "🌫️" : obs.includes("ruína") ? "🏛️" : "🪵"}
+                  </span>
+                </span>
               ))}
             </div>
             <div className="ks-map-ring ring-1" />
