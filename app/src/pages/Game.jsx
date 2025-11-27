@@ -182,6 +182,30 @@ export default function Game() {
     return items.sort((a, b) => (b.speed || 0) - (a.speed || 0)).slice(0, 10);
   })();
 
+  const helperTips = (() => {
+    const tips = [];
+    if (castle.hp < castle.max_hp * 0.4 && resources.energy >= 10 && resources.food >= 10) {
+      tips.push("HP baixo: priorize curar castelo (energia + comida).");
+    }
+    if ((enemies?.length || 0) > (towers?.length || 0) * 2) {
+      tips.push("Mais inimigos que torres: construir/upar torres pode equilibrar.");
+    }
+    if (resources.gold > 80 && resources.wood > 50) {
+      tips.push("Recursos altos: invista em pesquisa ou upgrades antes da próxima onda.");
+    }
+    if ((resources.stone || 0) > 30 && (resources.iron || 0) > 15) {
+      tips.push("Use pedra/ferro em pesquisas de defesa/ferro para muralha/torres.");
+    }
+    if (enemies?.some(e => e.boss)) {
+      tips.push("Chefe em campo: feitiço de Meteoro ou Escudo ajuda a segurar o dano extra.");
+    }
+    if ((state.achievements?.winStreak || 0) >= 5) {
+      tips.push("Streak alta: mantenha sem dano ao castelo para maximizar recompensas.");
+    }
+    if (tips.length === 0) tips.push("Situação estável. Continue avançando turnos ou pesquisando.");
+    return tips.slice(0, 4);
+  })();
+
   async function handleAuthSubmit(e) {
     e.preventDefault();
     const fn = authForm.mode === "login" ? login : register;
@@ -299,6 +323,12 @@ export default function Game() {
                 </div>
                 {t.boss && <span className="ks-chip danger">BOSS</span>}
               </div>
+            ))}
+          </div>
+          <div className="ks-helper">
+            <h3>Conselheiro IA (heurística)</h3>
+            {helperTips.map((tip, idx) => (
+              <div key={idx} className="ks-helper-item">{tip}</div>
             ))}
           </div>
         </section>

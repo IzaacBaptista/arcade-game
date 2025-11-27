@@ -41,15 +41,17 @@ arcade-game/
 ├── api/                 # Backend Node (Express + Game Engine)
 │   ├── src/
 │   │   ├── controllers/
+│   │   ├── data/
+│   │   ├── middleware/
 │   │   ├── routes/
 │   │   ├── services/
-│   │   └── data/
-│   └── server.js
+│   │   └── server.js
 │
 └── app/                 # Frontend React estilizado como jogo mobile
     ├── public/
     └── src/
         ├── api/
+        ├── assets/
         ├── components/
         ├── hooks/
         ├── pages/
@@ -62,7 +64,7 @@ arcade-game/
 
 ## ⚙️ Como Rodar o Projeto
 
-### 1) Rodando o backend (API)
+### 1) Rodando o backend (Node.js)
 
 ```bash
 cd api
@@ -92,6 +94,20 @@ O jogo abre automaticamente em:
 http://localhost:3000
 ```
 
+### 3 Instalando o banco de dados (Postgres)
+
+Use o Docker para rodar um container Postgres localmente:
+
+```bash
+docker run --name arcade-postgres -e POSTGRES_PASSWORD=yourpassword -p 5432:5432 -d postgres
+```
+
+```
+Altere `yourpassword` para a senha desejada.
+Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
+```
+
+
 ---
 
 ## 🎯 Funcionalidades Principais
@@ -101,6 +117,12 @@ http://localhost:3000
 - Muralha com níveis e pesquisas de pedra/ferro
 - Defesa extra de escudos na fase de combate e runas de guarda
 - Ganha dano por turno se inimigos sobreviverem
+
+### 🧩 UI / HUD / Qualidade de Vida
+- Log fixo na lateral com agrupamento de eventos
+- HUD de status (turno, fase, mapa, streak, buffs/debuffs, evento) + timeline de ação
+- Conselheiro IA com dicas contextuais
+- Modal de tesouros/poções e baú com joias
 
 ### 🏹 Torres
 - Construção de novas torres
