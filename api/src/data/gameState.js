@@ -24,6 +24,29 @@ const initialState = {
     efficiency: 1
   },
 
+  research: {
+    tower: 0,
+    troop: 0,
+    siege: 0,
+    defense: 0
+  },
+
+  hero: {
+    name: "Aurora",
+    charges: 2,
+    cooldown: 0
+  },
+
+  effects: {
+    castleShield: 0,
+    enemyWeakTurns: 0
+  },
+
+  achievements: {
+    winStreak: 0,
+    noDamageClear: false
+  },
+
   actionLocks: {
     lastCollectTurn: 0,
     lastBuilderCollectTurn: 0
@@ -53,6 +76,8 @@ const initialState = {
   },
 
   enemies: [],
+
+  castleDamageThisMap: 0,
 
   log: []
 };

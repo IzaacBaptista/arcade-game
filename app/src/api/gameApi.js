@@ -69,6 +69,24 @@ export async function upgradeWall() {
   return res.json();
 }
 
+export async function upgradeResearch(type) {
+  const res = await fetch(`${API_URL}/research/upgrade`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
+  return res.json();
+}
+
+export async function castSpell(type) {
+  const res = await fetch(`${API_URL}/spell/cast`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type }),
+  });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST" });
   return res.json();

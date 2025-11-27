@@ -25,10 +25,17 @@ class GameEngine {
     return gameState;
   }
 
-  buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false) {
+  buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false, role = "normal") {
     const bossMultiplier = isBoss ? 3.2 : 1;
     const hp = Math.floor((baseHp + difficulty * 2) * bossMultiplier);
     const attack = Math.floor((baseAttack + difficulty * 1.5) * bossMultiplier);
+
+    const resist = {
+      tower: role === "tank" ? 0.75 : 1,
+      troop: role === "tank" ? 0.8 : 1,
+      siege: role === "tank" ? 0.9 : 1,
+      flyer: role === "flyer"
+    };
 
     return {
       id: randomUUID(),
@@ -39,7 +46,10 @@ class GameEngine {
       attack,
       distance,
       reward: this.getEnemyReward(name, isBoss),
-      boss: isBoss
+      boss: isBoss,
+      role,
+      resist,
+      shieldReady: isBoss
     };
   }
 
@@ -67,16 +77,18 @@ class GameEngine {
     const difficulty = stage + gameState.map * 2;
     const enemies = [
       this.buildEnemy("Goblin", 12, 4, difficulty, 3),
-      this.buildEnemy("Ork", 28, 7, difficulty, 4)
+      this.buildEnemy("Ork", 28, 7, difficulty, 4, false, "tank"),
+      this.buildEnemy("Batedor Alado", 14, 6, difficulty, 2, false, "flyer")
     ];
 
     if (stage >= 2) {
       enemies.push(this.buildEnemy("Lobo Ágil", 18, 9, difficulty, 2));
+      enemies.push(this.buildEnemy("Xamã", 20, 5, difficulty, 3, false, "support"));
     }
 
     const isBossStage = stage === gameState.maxStage;
     if (isBossStage) {
-      enemies.push(this.buildEnemy("Chefe: Juggernaut", 80, 15, difficulty * 1.5, 4, true));
+      enemies.push(this.buildEnemy("Chefe: Juggernaut", 90, 16, difficulty * 1.6, 4, true, "boss"));
     }
 
     return enemies;
@@ -300,6 +312,83 @@ class GameEngine {
     return { msg: `Tropas de ${type} evoluíram para nível ${troop.level}.`, state: this.status() };
   }
 
+  upgradeResearch(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const research = gameState.research || { tower: 0, troop: 0, siege: 0, defense: 0 };
+    if (!(type in research)) return { msg: "Pesquisa inválida.", state: this.status() };
+
+    const current = research[type];
+    const costGold = 80 + current * 40 + gameState.map * 20;
+    const costWood = 50 + current * 30;
+    const costEnergy = 30 + current * 12;
+
+    if (gameState.resources.gold < costGold || gameState.resources.wood < costWood || gameState.resources.energy < costEnergy) {
+      return { msg: "Recursos insuficientes para pesquisar.", state: this.status() };
+    }
+
+    gameState.resources.gold -= costGold;
+    gameState.resources.wood -= costWood;
+    gameState.resources.energy -= costEnergy;
+    research[type] = current + 1;
+    gameState.research = research;
+
+    log.push(`Pesquisa ${type} avançou para nível ${research[type]} (custo ${costGold} ouro / ${costWood} madeira / ${costEnergy} energia).`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Pesquisa concluída.", state: this.status() };
+  }
+
+  castSpell(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+
+    const hero = gameState.hero;
+    if (!hero) return { msg: "Herói indisponível.", state: this.status() };
+
+    if (hero.cooldown > 0) {
+      return { msg: `Herói em recarga (${hero.cooldown} turnos).`, state: this.status() };
+    }
+
+    if (hero.charges <= 0) {
+      return { msg: "Sem cargas de habilidade.", state: this.status() };
+    }
+
+    let applied = false;
+    if (type === "meteor") {
+      const target = gameState.enemies[0];
+      if (target) {
+        const dmg = 70 + gameState.map * 10;
+        target.hp -= dmg;
+        log.push(`Meteoro caiu em ${target.name} causando ${dmg}.`);
+        if (target.hp <= 0) {
+          log.push(`${target.name} morreu!`);
+          this.grantEnemyRewards(target, log);
+          gameState.enemies.shift();
+        }
+        applied = true;
+      }
+    } else if (type === "ice") {
+      gameState.effects.enemyWeakTurns = 2;
+      log.push("Feitiço de gelo: inimigos enfraquecidos por 2 turnos.");
+      applied = true;
+    } else if (type === "shield") {
+      gameState.effects.castleShield = 120 + gameState.map * 20;
+      log.push("Escudo mágico levantado no castelo.");
+      applied = true;
+    }
+
+    if (applied) {
+      hero.charges -= 1;
+      hero.cooldown = 2;
+      gameState.hero = hero;
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg: "Habilidade usada.", state: this.status() };
+    }
+
+    return { msg: "Habilidade inválida.", state: this.status() };
+  }
+
   healCastle() {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
@@ -406,13 +495,71 @@ class GameEngine {
       return gameState;
     }
 
+    if (gameState.hero && gameState.hero.cooldown > 0) {
+      gameState.hero.cooldown -= 1;
+    }
+
+    // efeitos de início de turno
+    if (gameState.effects.enemyWeakTurns > 0) {
+      gameState.effects.enemyWeakTurns -= 1;
+    }
+    for (const enemy of gameState.enemies) {
+      if (enemy.boss) {
+        enemy.tempShield = Math.round(enemy.max_hp * 0.15);
+      } else {
+        enemy.tempShield = 0;
+      }
+    }
+
+    // suporte cura aliados
+    const supportUnits = gameState.enemies.filter(e => e.role === "support");
+    if (supportUnits.length > 0) {
+      const heal = 6 + gameState.stage;
+      gameState.enemies.forEach(e => {
+        if (e.role !== "support") {
+          e.hp = Math.min(e.max_hp, e.hp + heal);
+        }
+      });
+      log.push(`Xamãs restauraram ${heal} de vida para os aliados.`);
+    }
+
+    const research = gameState.research || { tower: 0, troop: 0, siege: 0, defense: 0 };
+    const towerMult = 1 + 0.05 * research.tower;
+    const troopMult = 1 + 0.05 * research.troop;
+    const siegeMult = 1 + 0.05 * research.siege;
+    const defenseMult = gameState.castle.defense_bonus + (research.defense * 2);
+
+    const applyDamage = (enemy, rawDamage, sourceType) => {
+      if (!enemy) return 0;
+      const resist = enemy.resist || {};
+      let mult = 1;
+      if (sourceType === "tower") mult = resist.tower ?? 1;
+      if (sourceType === "troop") mult = resist.troop ?? 1;
+      if (sourceType === "siege") mult = resist.siege ?? 1;
+      let damage = Math.round(rawDamage * mult);
+      if (gameState.effects.enemyWeakTurns > 0) {
+        damage = Math.round(damage * 1.15); // inimigos enfraquecidos sofrem mais
+      }
+      if (enemy.tempShield && enemy.tempShield > 0) {
+        const absorbed = Math.min(enemy.tempShield, damage);
+        enemy.tempShield -= absorbed;
+        damage -= absorbed;
+        if (absorbed > 0) {
+          log.push(`${enemy.name} bloqueou ${absorbed} com escudo!`);
+        }
+      }
+      enemy.hp -= damage;
+      return damage;
+    };
+
     // torres atacam
     for (const tower of gameState.towers) {
       if (gameState.enemies.length === 0) break;
 
       const target = gameState.enemies[0];
-      target.hp -= tower.damage;
-      log.push(`${tower.name} causou ${tower.damage} em ${target.name}`);
+      const dmg = Math.round(tower.damage * towerMult);
+      const dealt = applyDamage(target, dmg, "tower");
+      log.push(`${tower.name} causou ${dealt} em ${target.name}`);
 
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
@@ -424,7 +571,7 @@ class GameEngine {
     // tropas atacam
     let totalAttack = 0;
     for (const t of Object.values(gameState.troops)) {
-      totalAttack += t.qty * t.attack;
+      totalAttack += t.qty * t.attack * troopMult;
     }
 
     // arsenal contribui
@@ -438,12 +585,12 @@ class GameEngine {
     const infantryAttack =
       (armory.spears.qty * armory.spears.attack);
 
-    totalAttack += siegeAttack + cavalryAttack + infantryAttack;
+    totalAttack += (siegeAttack * siegeMult) + (cavalryAttack * troopMult) + (infantryAttack * troopMult);
 
     if (gameState.enemies.length > 0 && totalAttack > 0) {
       const target = gameState.enemies[0];
-      target.hp -= totalAttack;
-      log.push(`Tropas causam ${totalAttack} em ${target.name}`);
+      const dealt = applyDamage(target, totalAttack, "troop");
+      log.push(`Tropas causam ${dealt} em ${target.name}`);
 
       if (target.hp <= 0) {
         log.push(`${target.name} morreu!`);
@@ -455,14 +602,26 @@ class GameEngine {
     // inimigos atacam castelo
     let castleDamage = 0;
     const extraDefense = (armory.shields.qty * armory.shields.defense);
-    const defenseTotal = gameState.castle.defense_bonus + extraDefense;
+    const defenseTotal = defenseMult + extraDefense + (gameState.effects.castleShield ? 10 : 0);
 
     for (const enemy of gameState.enemies) {
-      const dmg = Math.max(0, enemy.attack - defenseTotal);
+      let enemyAttack = enemy.attack;
+      if (gameState.effects.enemyWeakTurns > 0) {
+        enemyAttack = Math.round(enemyAttack * 0.7);
+      }
+      const dmg = Math.max(0, enemyAttack - defenseTotal);
       castleDamage += dmg;
     }
 
+    if (gameState.effects.castleShield) {
+      const absorbed = Math.min(gameState.effects.castleShield, castleDamage);
+      castleDamage -= absorbed;
+      gameState.effects.castleShield -= absorbed;
+      if (absorbed > 0) log.push(`Escudo protegeu ${absorbed} de dano no castelo.`);
+    }
+
     if (castleDamage > 0) {
+      gameState.castleDamageThisMap += castleDamage;
       gameState.castle.hp = Math.max(0, gameState.castle.hp - castleDamage);
       log.push(`Castelo recebeu ${castleDamage} de dano`);
     }
@@ -470,6 +629,7 @@ class GameEngine {
     if (gameState.castle.hp <= 0) {
       gameState.status = "over";
       log.push("Castelo caiu! Game Over.");
+      gameState.achievements.winStreak = 0;
     }
 
     // todos inimigos morreram → próxima fase
@@ -477,9 +637,15 @@ class GameEngine {
       if (gameState.stage >= gameState.maxStage) {
         gameState.status = "won";
         log.push(`Mapa ${gameState.map} conquistado!`);
+        if (gameState.castleDamageThisMap === 0) {
+          gameState.achievements.noDamageClear = true;
+          log.push("Conquista: mapa vencido sem dano no castelo!");
+        }
+        gameState.achievements.winStreak += 1;
       } else {
         gameState.stage++;
         gameState.turn = 0;
+        gameState.castleDamageThisMap = 0;
         log.push(`Você avançou para a fase ${gameState.stage}!`);
         gameState.enemies = this.generateEnemies(gameState.stage);
       }

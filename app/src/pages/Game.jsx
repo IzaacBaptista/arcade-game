@@ -20,12 +20,14 @@ export default function Game() {
     runUpgradeTower,
     runTrainTroops,
     runUpgradeTroops,
+    runUpgradeResearch,
     runCollect,
     runCollectBuilders,
     runHireBuilders,
     runAddTower,
     runUpgradeWall,
     runHealCastle,
+    runCastSpell,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,
@@ -99,6 +101,8 @@ export default function Game() {
     resources = {},
     builders = { qty: 0, efficiency: 1 },
     armory = {},
+    research = { tower: 0, troop: 0, siege: 0, defense: 0 },
+    hero = { name: "Herói", charges: 0, cooldown: 0 },
   } = state;
 
   const gameOver = status === "over";
@@ -131,12 +135,23 @@ export default function Game() {
           <button className="ks-btn primary" onClick={runNextTurn} disabled={!isActive}>
             {isActive ? "Próximo turno" : "Ação indisponível"}
           </button>
-          <span className="ks-mini-label">Antecipe ondas e fortaleça as torres.</span>
+          <span className="ks-mini-label">Antecipe ondas e fortaleça as torres. Herói: {hero.charges} cargas • CD {hero.cooldown}</span>
           <div className="ks-inline-actions">
             <button className={`ks-btn ${autoMode ? "primary" : "ghost"}`} onClick={toggleAuto}>
               {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
             </button>
             <span className="ks-mini-label">{autoStatus}</span>
+          </div>
+          <div className="ks-inline-actions">
+            <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
+              Feitiço: Meteoro
+            </button>
+            <button className="ks-btn ghost" title="Enfraquece inimigos por 2 turnos" onClick={() => runCastSpell("ice")} disabled={!isActive}>
+              Feitiço: Gelo
+            </button>
+            <button className="ks-btn ghost" title="Escudo temporário no castelo" onClick={() => runCastSpell("shield")} disabled={!isActive}>
+              Feitiço: Escudo
+            </button>
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={runCollect} disabled={!isActive}>Coletar recursos</button>
@@ -197,6 +212,20 @@ export default function Game() {
               Curar castelo (energia + comida)
             </button>
             <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
+          </div>
+          <div className="ks-inline-actions" style={{ marginTop: 12 }}>
+            <button className="ks-btn ghost" title="Pesquisa de torres (+dano)" onClick={() => runUpgradeResearch("tower")} disabled={!isActive}>
+              Pesquisa: Torres (Lv {research.tower})
+            </button>
+            <button className="ks-btn ghost" title="Pesquisa de tropas (+ATK)" onClick={() => runUpgradeResearch("troop")} disabled={!isActive}>
+              Pesquisa: Tropas (Lv {research.troop})
+            </button>
+            <button className="ks-btn ghost" title="Pesquisa de cerco (+dano)" onClick={() => runUpgradeResearch("siege")} disabled={!isActive}>
+              Pesquisa: Cerco (Lv {research.siege})
+            </button>
+            <button className="ks-btn ghost" title="Pesquisa de defesa (+DEF)" onClick={() => runUpgradeResearch("defense")} disabled={!isActive}>
+              Pesquisa: Defesa (Lv {research.defense})
+            </button>
           </div>
           <div style={{ marginTop: 12 }}>
             <Builders builders={builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />

@@ -30,6 +30,12 @@ module.exports = {
     return res.json(result);
   },
 
+  upgradeResearch(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.upgradeResearch(type);
+    return res.json(result);
+  },
+
   collect(req, res) {
     const result = GameEngine.collectResources();
     return res.json(result);
@@ -48,6 +54,12 @@ module.exports = {
 
   heal(req, res) {
     const result = GameEngine.healCastle();
+    return res.json(result);
+  },
+
+  castSpell(req, res) {
+    const { type } = req.body;
+    const result = GameEngine.castSpell(type);
     return res.json(result);
   },
 
