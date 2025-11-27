@@ -4,7 +4,7 @@ const potionData = [
   { key: "loot", label: "Poção de saque", icon: "💰", desc: "+Ouro e madeira" },
 ];
 
-export default function Vault({ vault, onCollect, onUse, onOpen }) {
+export default function Vault({ vault, onCollect, onUsePotion, onUseRare, onOpen }) {
   const artifacts = vault.artifacts || [];
   const potions = vault.potions || {};
 
@@ -49,7 +49,7 @@ export default function Vault({ vault, onCollect, onUse, onOpen }) {
             <div className="ks-card-actions">
               <button
                 className="ks-btn ghost"
-                onClick={() => onUse(p.key)}
+                onClick={() => onUsePotion(p.key)}
                 disabled={(potions[p.key] ?? 0) <= 0}
               >
                 Usar

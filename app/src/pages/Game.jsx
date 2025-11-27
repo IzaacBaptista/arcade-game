@@ -16,6 +16,7 @@ export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
   const [autoStatus, setAutoStatus] = useState("Auto parado");
   const [vaultOpen, setVaultOpen] = useState(false);
+  const [showHelper, setShowHelper] = useState(true);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
   
@@ -40,6 +41,7 @@ export default function Game() {
     runApplyRune,
     runCollectTreasure,
     runUsePotion,
+    runUseRareItem,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,
@@ -264,6 +266,9 @@ export default function Game() {
             <button className="ks-btn ghost" onClick={logout}>
               Logout
             </button>
+            <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
+              {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
+            </button>
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
@@ -325,12 +330,14 @@ export default function Game() {
               </div>
             ))}
           </div>
-          <div className="ks-helper">
-            <h3>Conselheiro IA (heurística)</h3>
-            {helperTips.map((tip, idx) => (
-              <div key={idx} className="ks-helper-item">{tip}</div>
-            ))}
-          </div>
+          {showHelper && (
+            <div className="ks-helper">
+              <h3>Conselheiro IA (heurística)</h3>
+              {helperTips.map((tip, idx) => (
+                <div key={idx} className="ks-helper-item">{tip}</div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="ks-panel map-panel">
@@ -403,7 +410,13 @@ export default function Game() {
             <Builders builders={builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
           </div>
           <div className="ks-inline-actions" style={{ marginTop: 12 }}>
-            <Vault vault={vault} onCollect={runCollectTreasure} onUse={runUsePotion} onOpen={() => setVaultOpen(true)} />
+            <Vault
+              vault={vault}
+              onCollect={runCollectTreasure}
+              onUsePotion={runUsePotion}
+              onUseRare={runUseRareItem}
+              onOpen={() => setVaultOpen(true)}
+            />
           </div>
         </section>
 
@@ -446,7 +459,8 @@ export default function Game() {
           vault={vault}
           onClose={() => setVaultOpen(false)}
           onCollect={runCollectTreasure}
-          onUse={runUsePotion}
+          onUsePotion={runUsePotion}
+          onUseRare={runUseRareItem}
         />
       )}
   </div>

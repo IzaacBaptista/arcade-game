@@ -15,6 +15,7 @@ import {
   applyRune,
   collectTreasure,
   consumePotion,
+  useRareItem,
   healCastle,
   resetGame,
   nextMap,
@@ -141,6 +142,11 @@ export function useGame() {
     updateFrom(data);
   }
 
+  async function runUseRareItem(type) {
+    const data = await useRareItem(type);
+    updateFrom(data);
+  }
+
   async function runBuildArmory(type, amount) {
     const data = await buildArmory(type, amount);
     updateFrom(data);
@@ -189,6 +195,7 @@ export function useGame() {
     runApplyRune,
     runCollectTreasure,
     runUsePotion,
+    runUseRareItem,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,

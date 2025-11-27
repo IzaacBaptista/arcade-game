@@ -22,6 +22,7 @@ router.post("/armory/upgrade", GameController.upgradeArmory);
 router.post("/rune/apply", GameController.applyRune);
 router.post("/vault/collect", GameController.collectTreasure);
 router.post("/vault/potion", GameController.usePotion);
+router.post("/vault/rare", GameController.useRare);
 router.post("/tower/add", GameController.addTower);
 router.post("/castle/wall/upgrade", GameController.upgradeWall);
 router.post("/reset", GameController.reset);

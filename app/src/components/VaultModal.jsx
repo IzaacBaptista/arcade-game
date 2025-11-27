@@ -4,9 +4,17 @@ const potionData = [
   { key: "loot", label: "Poção de saque", icon: "💰", desc: "+Ouro e madeira" },
 ];
 
-export default function VaultModal({ vault, onClose, onCollect, onUse }) {
+const rareData = [
+  { key: "ring", label: "Anel de Poder", icon: "💍" },
+  { key: "book", label: "Grimório", icon: "📜" },
+  { key: "armor", label: "Armadura Sagrada", icon: "🛡️" },
+  { key: "haste", label: "Relógio Arcano", icon: "⏳" },
+];
+
+export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onUseRare }) {
   const artifacts = vault.artifacts || [];
   const potions = vault.potions || {};
+  const rare = vault.rare || [];
 
   return (
     <div className="ks-modal-backdrop" onClick={onClose}>
@@ -48,7 +56,7 @@ export default function VaultModal({ vault, onClose, onCollect, onUse }) {
               <div className="ks-card-actions">
                 <button
                   className="ks-btn ghost"
-                  onClick={() => onUse(p.key)}
+                  onClick={() => onUsePotion(p.key)}
                   disabled={(potions[p.key] ?? 0) <= 0}
                 >
                   Usar
@@ -56,6 +64,40 @@ export default function VaultModal({ vault, onClose, onCollect, onUse }) {
               </div>
             </div>
           ))}
+        </div>
+
+        <h3 style={{ marginTop: 12 }}>Itens raros</h3>
+        <div className="ks-vault-grid">
+          {rareData.map(r => {
+            const item = rare.find(x => x.key === r.key) || {};
+            const active = item.activeTurns > 0;
+            return (
+              <div key={r.key} className="ks-card" title={item.desc || ""}>
+                <div className="ks-card-head">
+                  <span className="ks-icon-circle">{r.icon}</span>
+                  <div>
+                    <p className="ks-label">{item.label || r.label}</p>
+                    <strong className="ks-title">{item.unlocked ? "Desbloqueado" : "Bloqueado"}</strong>
+                  </div>
+                </div>
+                <p className="ks-subtitle">{item.desc || "Item raro"}</p>
+                {active && (
+                  <div className="ks-bar small">
+                    <div className="ks-bar-fill" style={{ width: `${(item.activeTurns / (r.key === "haste" ? 2 : 3)) * 100}%` }} />
+                  </div>
+                )}
+                <div className="ks-card-actions">
+                  <button
+                    className="ks-btn ghost"
+                    onClick={() => onUseRare(r.key)}
+                    disabled={!item.unlocked}
+                  >
+                    Ativar
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

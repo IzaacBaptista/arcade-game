@@ -92,6 +92,11 @@ module.exports = {
     return withUserState(req, res, () => GameEngine.usePotion(type));
   },
 
+  useRare(req, res) {
+    const { type } = req.body;
+    return withUserState(req, res, () => GameEngine.useRareItem(type));
+  },
+
   addTower(req, res) {
     return withUserState(req, res, () => GameEngine.addTower());
   },

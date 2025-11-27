@@ -22,6 +22,8 @@ const initialState = {
     population: 20
   },
 
+  xp: 0,
+
   builders: {
     qty: 3,
     efficiency: 1
@@ -47,7 +49,11 @@ const initialState = {
 
   effects: {
     castleShield: 0,
-    enemyWeakTurns: 0
+    enemyWeakTurns: 0,
+    ringPowerTurns: 0,
+    bookTurns: 0,
+    armorTurns: 0,
+    hasteTurns: 0
   },
 
   achievements: {
@@ -61,7 +67,13 @@ const initialState = {
   vault: {
     jewels: 50,
     artifacts: [],
-    potions: { heal: 2, energy: 2, loot: 1 }
+    potions: { heal: 2, energy: 2, loot: 1 },
+    rare: [
+      { key: "ring", label: "Anel de Poder", icon: "💍", desc: "+20% atk torres por 3 turnos", unlocked: false, activeTurns: 0 },
+      { key: "book", label: "Grimório", icon: "📜", desc: "+15% atk tropas por 3 turnos", unlocked: false, activeTurns: 0 },
+      { key: "armor", label: "Armadura Sagrada", icon: "🛡️", desc: "+10 DEF castelo por 3 turnos", unlocked: false, activeTurns: 0 },
+      { key: "haste", label: "Relógio Arcano", icon: "⏳", desc: "-15% dano inimigo por 2 turnos", unlocked: false, activeTurns: 0 }
+    ]
   },
 
   mapLayout: {

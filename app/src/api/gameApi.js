@@ -117,6 +117,15 @@ export async function consumePotion(type) {
   return res.json();
 }
 
+export async function useRareItem(type) {
+  const res = await fetch(`${API_URL}/vault/rare`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ type }),
+  });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST", headers: authHeaders() });
   return res.json();

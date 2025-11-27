@@ -148,6 +148,7 @@ class GameEngine {
     gameState.resources.energy += energy;
     gameState.resources.stone += stone;
     gameState.resources.iron += iron;
+    gameState.xp += 5 + gameState.stage;
     gameState.actionLocks.lastCollectTurn = gameState.turn;
     log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida, +${energy} energia, +${stone} pedra, +${iron} ferro.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -216,6 +217,7 @@ class GameEngine {
     this.resetState(true);
     gameState.status = "ongoing";
     gameState.enemies = this.generateEnemies(gameState.stage);
+    gameState.xp += 50 + gameState.map * 20;
     return { msg: `Novo mapa iniciado (${gameState.map}).`, state: this.status() };
   }
 
@@ -516,6 +518,7 @@ class GameEngine {
     gameState.vault.jewels += gainJewels;
     gameState.resources.gold += gainGold;
     gameState.resources.wood += gainWood;
+    gameState.xp += 10;
 
     log.push(`Baú: +${gainJewels} joias, +${gainGold} ouro, +${gainWood} madeira.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -550,6 +553,24 @@ class GameEngine {
     gameState.vault.potions = potions;
     gameState.log = [...log, ...gameState.log].slice(0, 10);
     return { msg: "Poção usada.", state: this.status() };
+  }
+
+  useRareItem(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    const rare = gameState.vault.rare || [];
+    const item = rare.find(r => r.key === type);
+    if (!item || !item.unlocked) return { msg: "Item indisponível.", state: this.status() };
+
+    if (type === "ring") gameState.effects.ringPowerTurns = 3;
+    if (type === "book") gameState.effects.bookTurns = 3;
+    if (type === "armor") gameState.effects.armorTurns = 3;
+    if (type === "haste") gameState.effects.hasteTurns = 2;
+    item.activeTurns = type === "haste" ? 2 : 3;
+
+    log.push(`${item.label} ativado!`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Item ativado.", state: this.status() };
   }
 
   upgradeArmory(type) {
@@ -795,8 +816,20 @@ class GameEngine {
     if (gameState.lootBuff) goldGain = Math.round(goldGain * gameState.lootBuff);
     gameState.resources.gold += goldGain;
     log.push(`Recompensa: +${goldGain} ouro de ${enemy.name}.`);
+    const xpGain = Math.max(5, Math.round(goldGain * 2));
+    gameState.xp += xpGain;
 
     this.rewardForEnemy(enemy, log);
+    // desbloqueia itens raros conforme progressão
+    const rare = gameState.vault.rare || [];
+    const unlock = (key) => {
+      const item = rare.find(r => r.key === key);
+      if (item) item.unlocked = true;
+    };
+    if (enemy.boss) {
+      unlock("armor");
+      unlock("ring");
+    }
   }
 
   rewardForEnemy(enemy, log) {
