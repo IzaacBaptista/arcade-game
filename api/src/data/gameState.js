@@ -16,7 +16,10 @@ const initialState = {
     gold: 100,
     wood: 50,
     energy: 30,
-    food: 70
+    food: 70,
+    stone: 40,
+    iron: 20,
+    population: 20
   },
 
   builders: {
@@ -67,6 +70,15 @@ const initialState = {
     effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] }
   },
 
+  techTree: {
+    ferro: 0,
+    pedra: 0,
+    agricultura: 0,
+    engenharia: 0
+  },
+
+  lastEvent: null,
+
   actionLocks: {
     lastCollectTurn: 0,
     lastBuilderCollectTurn: 0
@@ -77,7 +89,9 @@ const initialState = {
       id: 1,
       name: "Torre Arqueira",
       level: 1,
-      damage: 12
+      damage: 12,
+      rune_power: 0,
+      rune_guard: 0
     }
   ],
 

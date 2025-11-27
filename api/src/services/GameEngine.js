@@ -140,12 +140,16 @@ class GameEngine {
     const wood = 15 + gameState.stage * 4 + gameState.map * 2;
     const food = 12 + gameState.stage * 3 + gameState.map * 2;
     const energy = 6 + gameState.stage * 2;
+    const stone = 8 + gameState.stage * 3;
+    const iron = 5 + gameState.stage * 2 + gameState.map;
     gameState.resources.gold += gold;
     gameState.resources.wood += wood;
     gameState.resources.food += food;
     gameState.resources.energy += energy;
+    gameState.resources.stone += stone;
+    gameState.resources.iron += iron;
     gameState.actionLocks.lastCollectTurn = gameState.turn;
-    log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida e +${energy} energia.`);
+    log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida, +${energy} energia, +${stone} pedra, +${iron} ferro.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return { msg: "Recursos coletados", state: this.status() };
@@ -279,13 +283,15 @@ class GameEngine {
     const wood = Math.round((25 + gameState.stage * 6 + gameState.map * 4) * efficiencyFactor * loadFactor);
     const gold = Math.round((16 + gameState.stage * 5 + gameState.map * 3) * efficiencyFactor * loadFactor);
     const food = Math.round((18 + gameState.stage * 4 + gameState.map * 3) * efficiencyFactor * loadFactor);
+    const stone = Math.round((14 + gameState.stage * 3 + gameState.map * 2) * efficiencyFactor * loadFactor);
 
     gameState.resources.wood += wood;
     gameState.resources.gold += gold;
     gameState.resources.food += food;
+    gameState.resources.stone += stone;
     gameState.actionLocks.lastBuilderCollectTurn = gameState.turn;
 
-    log.push(`Construtores coletaram +${wood} madeira, +${gold} ouro e +${food} comida.`);
+    log.push(`Construtores coletaram +${wood} madeira, +${gold} ouro, +${food} comida e +${stone} pedra.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
     return { msg: "Coleta de construtores concluída.", state: this.status() };
@@ -591,6 +597,31 @@ class GameEngine {
       gameState.hero.cooldown -= 1;
     }
 
+    // eventos aleatórios
+    let eventBuff = { towerAtk: 1, castleDef: 0, troopAtk: 1 };
+    if (Math.random() < 0.2) {
+      const events = [
+        { key: "chuva", desc: "Chuva forte: torres -30% atk, muralha +10 def", towerAtk: 0.7, castleDef: 10, troopAtk: 1 },
+        { key: "sol", desc: "Dia ensolarado: colheita +50% comida", harvest: { food: 1.5 } },
+        { key: "goblin", desc: "Bando de goblins: +20% ouro de abates", loot: 1.2 },
+        { key: "alfa", desc: "Lobo Alfa: feras +20% atk", beast: 1.2 }
+      ];
+      const chosen = events[Math.floor(Math.random() * events.length)];
+      gameState.lastEvent = chosen.desc;
+      if (chosen.towerAtk) eventBuff.towerAtk = chosen.towerAtk;
+      if (chosen.castleDef) eventBuff.castleDef = chosen.castleDef;
+      if (chosen.troopAtk) eventBuff.troopAtk = chosen.troopAtk;
+      if (chosen.harvest) {
+        gameState.resources.food = Math.round(gameState.resources.food * chosen.harvest.food);
+      }
+      if (chosen.loot) {
+        gameState.lootBuff = chosen.loot;
+      }
+      if (chosen.beast) {
+        gameState.beastBuff = chosen.beast;
+      }
+    }
+
     // efeitos de início de turno
     if (gameState.effects.enemyWeakTurns > 0) {
       gameState.effects.enemyWeakTurns -= 1;
@@ -649,7 +680,8 @@ class GameEngine {
       if (gameState.enemies.length === 0) break;
 
       const target = gameState.enemies[0];
-      const dmg = Math.round(tower.damage * towerMult);
+      const runeBonus = 1 + (tower.rune_power || 0) * 0.05;
+      const dmg = Math.round(tower.damage * towerMult * eventBuff.towerAtk * runeBonus);
       const dealt = applyDamage(target, dmg, "tower");
       log.push(`${tower.name} causou ${dealt} em ${target.name}`);
 
@@ -705,8 +737,9 @@ class GameEngine {
     // inimigos atacam castelo
     let castleDamage = 0;
     const extraDefense = (armory.shields.qty * armory.shields.defense);
+    const runeDefense = (gameState.towers || []).reduce((acc, t) => acc + (t.rune_guard || 0), 0) * 1.5;
     const slowFactor = 1 - (gameState.mapLayout?.effects?.enemySlow || 0);
-    const defenseTotal = defenseMult + extraDefense + (gameState.effects.castleShield ? 10 : 0);
+    const defenseTotal = defenseMult + extraDefense + runeDefense + (gameState.effects.castleShield ? 10 : 0);
 
     for (const enemy of gameState.enemies) {
       let enemyAttack = enemy.attack * slowFactor;
@@ -767,7 +800,8 @@ class GameEngine {
   }
 
   grantEnemyRewards(enemy, log) {
-    const goldGain = enemy.reward ?? 10;
+    let goldGain = enemy.reward ?? 10;
+    if (gameState.lootBuff) goldGain = Math.round(goldGain * gameState.lootBuff);
     gameState.resources.gold += goldGain;
     log.push(`Recompensa: +${goldGain} ouro de ${enemy.name}.`);
 

@@ -200,6 +200,9 @@ export default function Game() {
             <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
             <span className="ks-pill hp">❤️ {castle.hp} / {castle.max_hp}</span>
             <span className="ks-pill soft" title="Streak de vitórias">🔥 Streak {state.achievements?.winStreak ?? 0}</span>
+            <span className="ks-pill stone">🪨 Pedra {resources.stone ?? 0}</span>
+            <span className="ks-pill iron">⛓️ Ferro {resources.iron ?? 0}</span>
+            <span className="ks-pill population">👥 Pop {resources.population ?? 0}</span>
           </div>
         </div>
         <div className="ks-hero-actions">
@@ -264,6 +267,7 @@ export default function Game() {
             <span className="ks-pill soft">Streak {state.achievements?.winStreak ?? 0}</span>
             <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
+            <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
           </div>
         </section>
 
