@@ -138,7 +138,7 @@ export async function summonBeast() {
 export async function selectHero(key) {
   const res = await fetch(`${API_URL}/hero/select`, {
     method: "POST",
-    headers: authHeaders(),
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ key })
   });
   return res.json();
