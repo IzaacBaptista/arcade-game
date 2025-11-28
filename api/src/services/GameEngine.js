@@ -132,7 +132,8 @@ class GameEngine {
       shieldReady: isBoss,
       speed: baseSpeed,
       initiative,
-      bossSkills: isBoss ? ["fury", "stomp", "gobcall", "resist"] : []
+      bossSkills: isBoss ? ["fury", "stomp", "gobcall", "resist"] : [],
+      class: isBoss ? "boss" : role === "tank" ? "tank" : role === "flyer" ? "fast" : role === "support" ? "support" : "dps"
     };
   }
 

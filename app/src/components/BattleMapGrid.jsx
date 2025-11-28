@@ -88,6 +88,7 @@ export default function BattleMapGrid({ mapLayout, castle, towers, enemies }) {
 
             const enemy = cell.enemies[0];
             const tower = cell.towers[0];
+            const enemyClass = enemy?.class || (enemy?.boss ? "boss" : "dps");
 
             return (
               <div className={classes.join(" ")} key={key}>
@@ -108,11 +109,14 @@ export default function BattleMapGrid({ mapLayout, castle, towers, enemies }) {
                 )}
 
                 {!cell.isCastle && enemy && (
-                  <div className="ks-cell-content enemy">
-                    <span className="ks-cell-icon">{enemy.icon || "👹"}</span>
-                    <span className="ks-cell-label">
-                      {Math.max(1, Math.round((enemy.hp / enemy.max_hp) * 100))}%
-                    </span>
+                  <div className={`ks-enemy ${enemyClass}`}>
+                    <span className="ks-enemy-icon">{enemy.icon || "👹"}</span>
+                    <div className="ks-enemy-hpbar">
+                      <div
+                        className="ks-enemy-hpbar-fill"
+                        style={{ width: `${Math.max(0, (enemy.hp / enemy.max_hp) * 100)}%` }}
+                      />
+                    </div>
                     {enemy.boss && <span className="ks-boss-tag">BOSS</span>}
                   </div>
                 )}
