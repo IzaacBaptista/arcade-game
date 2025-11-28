@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import Castle from "../components/Castle";
-import Towers from "../components/Towers";
+// import Towers from "../components/Towers";
 import Troops from "../components/Troops";
-import Enemies from "../components/Enemies";
+// import Enemies from "../components/Enemies";
 import Log from "../components/Log";
 import Builders from "../components/Builders";
 import Barracks from "../components/Barracks";
 import Vault from "../components/Vault";
 import VaultModal from "../components/VaultModal";
 import BattlefieldTroops from "../components/BattlefieldTroops";
+import BattleMapGrid from "../components/BattleMapGrid";
 import { login, register } from "../api/gameApi";
 
 import { useGame } from "../hooks/useGame";
@@ -28,7 +29,7 @@ export default function Game() {
     logout,
     runStartGame,
     runNextTurn,
-    runUpgradeTower,
+    // runUpgradeTower,
     runTrainTroops,
     runUpgradeTroops,
     runUpgradeResearch,
@@ -436,17 +437,12 @@ export default function Game() {
                 </span>
               ))}
             </div>
-            <div className="ks-map-ring ring-1" />
-            <div className="ks-map-ring ring-2" />
-            <div className="ks-map-ring ring-3" />
-            <div className="ks-map-center">
-              <span className="ks-map-flag">🏰</span>
-            </div>
-            <div className="ks-path">Rotas inimigas</div>
-            <div className="ks-map-grid">
-              <Towers towers={towers} onUpgrade={runUpgradeTower} />
-              <Enemies enemies={enemies} />
-            </div>
+            <BattleMapGrid
+              mapLayout={state.mapLayout}
+              castle={castle}
+              towers={towers}
+              enemies={enemies}
+            />
             <BattlefieldTroops troops={troops} armory={armory} />
           </div>
         </section>

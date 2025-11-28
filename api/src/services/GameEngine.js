@@ -71,11 +71,28 @@ class GameEngine {
   }
 
   status() {
+    this.ensureUnlocks();
     return gameState;
   }
 
   setDifficulty(level) {
     gameState.difficulty = level || "medium";
+  }
+
+  ensureUnlocks() {
+    if (!gameState.vault) gameState.vault = JSON.parse(JSON.stringify(initialState.vault));
+    if (!gameState.vault.rare) gameState.vault.rare = JSON.parse(JSON.stringify(initialState.vault.rare));
+    if (!gameState.hero) gameState.hero = JSON.parse(JSON.stringify(initialState.hero));
+
+    if (gameState.map >= 2) {
+      // garante fera gigante e itens raros disponíveis após mapa 2
+      gameState.hero.beast = gameState.hero.beast || { unlocked: true, ready: true, activeTurns: 0 };
+      gameState.hero.beast.unlocked = true;
+      gameState.hero.beast.ready = gameState.hero.beast.ready ?? true;
+      gameState.hero.beast.activeTurns = gameState.hero.beast.activeTurns || 0;
+
+      gameState.vault.rare = (gameState.vault.rare || []).map(r => ({ ...r, unlocked: true }));
+    }
   }
 
   difficultyMod() {

@@ -221,15 +221,27 @@ Você pode substituir quando quiser por prints reais do seu jogo.
 ---
 
 ## 🚀 Roadmap
-Coisas já mapeadas para evolução:
+Coisas já mapeadas para evolução (prioridades):
 
-- Heroínas/feitiços avançados e tech tree profunda
-- Novos tipos de inimigos por bioma, mini-chefes e mutações
-- Modo sobrevivência infinito
-- Slots de runas por torre e árvore de pesquisa detalhada
-- Efeitos sonoros e animações
-- Mapa em tiles (tower defense grid) com caminhos múltiplos
-- Pontuação global e ranking
+**A) Interface / Frontend**
+- Mapa real em grid (10×10) com tiles/rotas, obstáculos e torres visíveis, animação de turnos
+- Sprites/anim 2D para inimigos (pixel-art), HP bar sobre a cabeça
+- Tela de seleção de bioma (floresta, neve, deserto, vulcão, pântano, medieval, campo), bônus/penalidades
+- Modo fullscreen/mobile responsivo, HUD colapsável
+
+**B) Gameplay / Engine**
+- Novas classes de tropas (lanceiros, monges, assassinos, magos) com roles e skills
+- Inimigos com habilidades ativas (goblin explosivo, ork furioso, lobo alfa, xamã cura, voador ignora muralha)
+- Sistema de missões (ex.: derrotar 30 orks, mapa sem dano, evoluir torres) com recompensas (XP, poções, joias, skins)
+- Prestígio/reinício ao finalizar todos os mapas (moeda “Reino” para buffs permanentes)
+- Ondas temáticas/élite (horda massiva, suporte/tank focus, aura de atk/speed/heal)
+- Cidades/prédios do reino: ferrovia/mina, templo, biblioteca, estábulo, fornalha, mercado (upgrades 1–10)
+
+**C) Mid-term**
+- Modo expedições (missões offline temporizadas com recompensas)
+- Modo Arena (endless PVE com scaling e drops raros)
+- Sistema de clãs (ranking, doações, conquistas em equipe)
+- Modo história com pequenas cutscenes
 
 ---
 

@@ -198,6 +198,105 @@
   opacity: 1;
 }
 
+.ks-map-grid2 {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(9, 1fr);
+  gap: 4px;
+  z-index: 1;
+  background: rgba(0,0,0,0.04);
+  padding: 6px;
+  border-radius: 18px;
+}
+
+.ks-map-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+}
+
+.ks-map-cell {
+  position: relative;
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+  font-size: 11px;
+}
+
+.ks-map-cell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.terrain-grass { background: linear-gradient(135deg, #d9f2c6, #c0e3aa); }
+.terrain-ice { background: linear-gradient(135deg, #e8f4ff, #d0e4f9); }
+.terrain-desert { background: linear-gradient(135deg, #f8e3b0, #f0c98a); }
+.terrain-swamp { background: linear-gradient(135deg, #d6f2df, #a6d9b8); }
+.terrain-volcano { background: linear-gradient(135deg, #fce2d6, #f5b8a2); }
+
+.ks-map-cell.is-path {
+  box-shadow: inset 0 0 0 2px rgba(120, 72, 24, 0.4);
+  background-image: linear-gradient(135deg, rgba(90, 59, 30, 0.12), rgba(150, 103, 60, 0.18));
+}
+
+.ks-map-cell.is-castle {
+  box-shadow: 0 0 0 2px rgba(24, 63, 140, 0.4);
+}
+
+.ks-cell-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.ks-cell-content.castle .ks-cell-icon { font-size: 18px; }
+.ks-cell-content.enemy .ks-cell-icon { font-size: 18px; animation: enemy-bounce 0.8s ease-in-out infinite alternate; }
+.ks-cell-content.tower .ks-cell-icon { font-size: 16px; }
+
+.ks-cell-label {
+  font-size: 10px;
+  background: rgba(0,0,0,0.22);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.ks-cell-path-indicator {
+  width: 60%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(120, 72, 24, 0.9);
+  opacity: 0.6;
+}
+
+.ks-boss-tag {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: #b91c1c;
+  color: #fff;
+}
+
+.ks-map-cell.has-enemy {
+  animation: cell-alert 0.7s ease-in-out infinite alternate;
+}
+.ks-map-cell.has-tower:not(.is-castle) {
+  box-shadow: 0 0 0 2px rgba(202, 138, 4, 0.65);
+}
+
+@keyframes cell-alert {
+  from { outline: 0 solid rgba(239, 68, 68, 0); }
+  to { outline: 1px solid rgba(239, 68, 68, 0.5); }
+}
 .ks-obstacles {
   position: absolute;
   left: 16px;
