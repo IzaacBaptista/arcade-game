@@ -4,6 +4,7 @@ const initialState = {
   status: "ongoing",
   stage: 1,
   turn: 1,
+  difficulty: "medium",
 
   castle: {
     hp: 1000,

@@ -29,11 +29,16 @@ class GameEngine {
     ];
   }
 
-  resetState(keepMap = false) {
+  resetState(keepMap = false, difficulty = null) {
     const fresh = JSON.parse(JSON.stringify(initialState));
     this.enemySeq = 0;
     if (keepMap) {
       fresh.map = gameState.map + 1;
+    }
+    if (difficulty) {
+      fresh.difficulty = difficulty;
+    } else if (gameState.difficulty) {
+      fresh.difficulty = gameState.difficulty;
     }
     fresh.mapLayout = this.pickLayout(fresh.map);
 
@@ -60,7 +65,7 @@ class GameEngine {
   }
 
   startGame() {
-    this.resetState();
+    this.resetState(false, gameState.difficulty || "medium");
     gameState.enemies = this.generateEnemies(gameState.stage);
     return gameState;
   }
@@ -69,10 +74,22 @@ class GameEngine {
     return gameState;
   }
 
+  setDifficulty(level) {
+    gameState.difficulty = level || "medium";
+  }
+
+  difficultyMod() {
+    const lvl = gameState.difficulty || "medium";
+    if (lvl === "easy") return { enemy: 0.85, resource: 1.15, damageTaken: 0.9 };
+    if (lvl === "hard") return { enemy: 1.25, resource: 0.9, damageTaken: 1.1 };
+    return { enemy: 1.0, resource: 1.0, damageTaken: 1.0 };
+  }
+
   buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false, role = "normal") {
     const bossMultiplier = isBoss ? 3.2 : 1;
-    const hp = Math.floor((baseHp + difficulty * 2) * bossMultiplier);
-    const attack = Math.floor((baseAttack + difficulty * 1.5) * bossMultiplier);
+    const diff = this.difficultyMod();
+    const hp = Math.floor((baseHp + difficulty * 2) * bossMultiplier * diff.enemy);
+    const attack = Math.floor((baseAttack + difficulty * 1.5) * bossMultiplier * diff.enemy);
     const baseSpeed = role === "flyer" ? 10 : role === "support" ? 6 : role === "tank" ? 4 : 7;
     const initiative = isBoss ? 2 : role === "flyer" ? 1 : 0;
 
@@ -185,12 +202,13 @@ class GameEngine {
     const energy = 6 + gameState.stage * 2;
     const stone = 8 + gameState.stage * 3;
     const iron = 5 + gameState.stage * 2 + gameState.map;
-    gameState.resources.gold += gold;
-    gameState.resources.wood += wood;
-    gameState.resources.food += food;
-    gameState.resources.energy += energy;
-    gameState.resources.stone += stone;
-    gameState.resources.iron += iron;
+    const resMod = this.difficultyMod().resource;
+    gameState.resources.gold += Math.round(gold * resMod);
+    gameState.resources.wood += Math.round(wood * resMod);
+    gameState.resources.food += Math.round(food * resMod);
+    gameState.resources.energy += Math.round(energy * resMod);
+    gameState.resources.stone += Math.round(stone * resMod);
+    gameState.resources.iron += Math.round(iron * resMod);
     gameState.xp += 5 + gameState.stage;
     gameState.actionLocks.lastCollectTurn = gameState.turn;
     log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida, +${energy} energia, +${stone} pedra, +${iron} ferro.`);
@@ -394,6 +412,8 @@ class GameEngine {
     gameState.resources.gold -= costGold;
     gameState.resources.food -= costFood;
     gameState.builders.qty += amount;
+    // aumenta população quando contrata
+    gameState.resources.population = (gameState.resources.population || 0) + amount;
     this.ensureWorkersCount();
 
     log.push(`Contratou ${amount} construtor(es). (custo ${costGold} ouro / ${costFood} comida)`);
@@ -903,7 +923,7 @@ class GameEngine {
     const defenseTotal = defenseMult + extraDefense + runeDefense + (gameState.effects.castleShield ? 10 : 0);
 
     for (const enemy of gameState.enemies) {
-      let enemyAttack = enemy.attack * slowFactor * hasteDebuff;
+      let enemyAttack = enemy.attack * slowFactor * hasteDebuff * this.difficultyMod().damageTaken;
       if (enemy.boss) enemyAttack *= 1.1;
       if (gameState.effects.enemyWeakTurns > 0) {
         enemyAttack = Math.round(enemyAttack * 0.7);

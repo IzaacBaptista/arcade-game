@@ -26,6 +26,7 @@ export default function Game() {
     loading,
     setToken,
     logout,
+    runStartGame,
     runNextTurn,
     runUpgradeTower,
     runTrainTroops,
@@ -236,6 +237,10 @@ export default function Game() {
     return {};
   })();
 
+  function changeDifficulty(level) {
+    runStartGame(level);
+  }
+
   async function handleAuthSubmit(e) {
     e.preventDefault();
     const fn = authForm.mode === "login" ? login : register;
@@ -286,6 +291,11 @@ export default function Game() {
               {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
             </button>
             <span className="ks-mini-label">{autoStatus}</span>
+          </div>
+          <div className="ks-inline-actions">
+            <button className={`ks-btn ${state.difficulty === "easy" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("easy")}>Easy</button>
+            <button className={`ks-btn ${state.difficulty === "medium" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("medium")}>Medium</button>
+            <button className={`ks-btn ${state.difficulty === "hard" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("hard")}>Hard</button>
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={() => { const saved = loadSaved(); if (saved) setAutoMode(false); }}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   getStatus,
+  startGame,
   nextTurn,
   upgradeTower,
   trainTroops,
@@ -68,6 +69,11 @@ export function useGame() {
     updateFrom(data);
   }
 
+  async function runStartGame(difficulty) {
+    const data = await startGame(difficulty);
+    updateFrom(data);
+    return data;
+  }
   async function runNextTurn() {
     const data = await nextTurn();
     updateFrom(data);
@@ -170,6 +176,7 @@ export function useGame() {
     setToken,
     loadStatus,
     loadSaved,
+    runStartGame,
     logout() {
       setState(null);
       setToken(null);

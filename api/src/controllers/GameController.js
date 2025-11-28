@@ -16,6 +16,8 @@ async function withUserState(req, res, action) {
 
 module.exports = {
   start(req, res) {
+    const { difficulty } = req.body || {};
+    if (difficulty) GameEngine.setDifficulty(difficulty);
     return withUserState(req, res, () => GameEngine.startGame());
   },
 

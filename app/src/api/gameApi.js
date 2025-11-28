@@ -12,8 +12,12 @@ export async function getStatus() {
   return res.json();
 }
 
-export async function startGame() {
-  const res = await fetch(`${API_URL}/start`, { method: "POST", headers: authHeaders() });
+export async function startGame(difficulty) {
+  const res = await fetch(`${API_URL}/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ difficulty })
+  });
   return res.json();
 }
 
