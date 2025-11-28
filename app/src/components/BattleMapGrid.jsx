@@ -28,7 +28,7 @@ function createEmptyGrid() {
   );
 }
 
-export default function BattleMapGrid({ mapLayout, castle, towers, enemies }) {
+export default function BattleMapGrid({ mapLayout, castle, towers, enemies, pathPositions }) {
   const grid = createEmptyGrid();
   const layoutName = (mapLayout?.name || "").toLowerCase();
 
@@ -41,8 +41,14 @@ export default function BattleMapGrid({ mapLayout, castle, towers, enemies }) {
 
   grid[CASTLE_POS.y][CASTLE_POS.x].isCastle = true;
 
-  const basePath = buildDefaultPath();
-  basePath.forEach((pos) => {
+  const basePath = (pathPositions && pathPositions.length ? pathPositions : buildDefaultPath()).map((p, idx) => ({
+    x: p.x,
+    y: p.y,
+    pathIndex: p.pathIndex ?? idx
+  }));
+  const sortedPath = [...basePath].sort((a, b) => a.pathIndex - b.pathIndex);
+
+  sortedPath.forEach((pos) => {
     if (grid[pos.y] && grid[pos.y][pos.x]) {
       grid[pos.y][pos.x].isPath = true;
       grid[pos.y][pos.x].pathIndex = pos.pathIndex;
@@ -50,9 +56,10 @@ export default function BattleMapGrid({ mapLayout, castle, towers, enemies }) {
   });
 
   const activeEnemies = enemies || [];
-  const sortedPath = [...basePath].sort((a, b) => a.pathIndex - b.pathIndex);
-  activeEnemies.forEach((enemy, idx) => {
-    const pathPos = sortedPath[Math.min(idx, sortedPath.length - 1)];
+  activeEnemies.forEach((enemy) => {
+    const posIdx = Math.min(enemy.positionIndex || 0, sortedPath.length - 1);
+    const pathPos = sortedPath[posIdx] || sortedPath[sortedPath.length - 1];
+    if (!pathPos) return;
     const cell = grid[pathPos.y][pathPos.x];
     cell.enemies.push(enemy);
   });

@@ -437,12 +437,13 @@ export default function Game() {
                 </span>
               ))}
             </div>
-            <BattleMapGrid
-              mapLayout={state.mapLayout}
-              castle={castle}
-              towers={towers}
-              enemies={enemies}
-            />
+          <BattleMapGrid
+            mapLayout={state.mapLayout}
+            castle={castle}
+            towers={towers}
+            enemies={enemies}
+            pathPositions={state.path}
+          />
             <BattlefieldTroops troops={troops} armory={armory} />
           </div>
         </section>

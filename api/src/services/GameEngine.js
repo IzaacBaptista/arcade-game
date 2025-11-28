@@ -16,6 +16,7 @@ function shortageMessage(required) {
 class GameEngine {
   constructor() {
     this.enemySeq = 0;
+    this.gridSize = 9;
     this.mapLayouts = [
       { name: "Vale Sereno", paths: 2, effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] } },
       { name: "Desfiladeiro Sombrio", paths: 3, effects: { enemySlow: 0.12, towerBuff: 0.0, obstacles: ["neblina", "raízes"] } },
@@ -27,6 +28,17 @@ class GameEngine {
       { name: "Cânion Ardente", paths: 3, effects: { enemySlow: 0.07, towerBuff: 0.05, obstacles: ["rochas", "fumaça"] } },
       { name: "Planície Ventosa", paths: 2, effects: { enemySlow: 0.03, towerBuff: 0.08, obstacles: ["grama", "pedras"] } }
     ];
+  }
+
+  buildDefaultPath() {
+    const min = 2;
+    const max = 6;
+    const path = [];
+    for (let x = min; x <= max; x++) path.push({ x, y: min });
+    for (let y = min + 1; y <= max; y++) path.push({ x: max, y });
+    for (let x = max - 1; x >= min; x--) path.push({ x, y: max });
+    for (let y = max - 1; y > min; y--) path.push({ x: min, y });
+    return path;
   }
 
   resetState(keepMap = false, difficulty = null) {
@@ -41,6 +53,7 @@ class GameEngine {
       fresh.difficulty = gameState.difficulty;
     }
     fresh.mapLayout = this.pickLayout(fresh.map);
+    fresh.path = this.buildDefaultPath();
 
     if (keepMap) {
       // mantém inventário acumulado
@@ -72,6 +85,9 @@ class GameEngine {
 
   status() {
     this.ensureUnlocks();
+    if (!gameState.path || !gameState.path.length) {
+      gameState.path = this.buildDefaultPath();
+    }
     return gameState;
   }
 
@@ -83,6 +99,13 @@ class GameEngine {
     if (!gameState.vault) gameState.vault = JSON.parse(JSON.stringify(initialState.vault));
     if (!gameState.vault.rare) gameState.vault.rare = JSON.parse(JSON.stringify(initialState.vault.rare));
     if (!gameState.hero) gameState.hero = JSON.parse(JSON.stringify(initialState.hero));
+    if (!gameState.path || !gameState.path.length) gameState.path = this.buildDefaultPath();
+    if (Array.isArray(gameState.enemies)) {
+      gameState.enemies = gameState.enemies.map(e => ({
+        ...e,
+        positionIndex: e.positionIndex ?? 0
+      }));
+    }
 
     if (gameState.map >= 2) {
       // garante fera gigante e itens raros disponíveis após mapa 2
@@ -133,7 +156,8 @@ class GameEngine {
       speed: baseSpeed,
       initiative,
       bossSkills: isBoss ? ["fury", "stomp", "gobcall", "resist"] : [],
-      class: isBoss ? "boss" : role === "tank" ? "tank" : role === "flyer" ? "fast" : role === "support" ? "support" : "dps"
+      class: isBoss ? "boss" : role === "tank" ? "tank" : role === "flyer" ? "fast" : role === "support" ? "support" : "dps",
+      positionIndex: 0
     };
   }
 
@@ -162,19 +186,19 @@ class GameEngine {
   generateEnemies(stage) {
     const difficulty = stage + gameState.map * 2;
     const enemies = [
-      this.buildEnemy("Goblin", 12, 4, difficulty, 3),
-      this.buildEnemy("Ork", 28, 7, difficulty, 4, false, "tank"),
-      this.buildEnemy("Batedor Alado", 14, 6, difficulty, 2, false, "flyer")
+      { ...this.buildEnemy("Goblin", 12, 4, difficulty, 3), positionIndex: 0 },
+      { ...this.buildEnemy("Ork", 28, 7, difficulty, 4, false, "tank"), positionIndex: 0 },
+      { ...this.buildEnemy("Batedor Alado", 14, 6, difficulty, 2, false, "flyer"), positionIndex: 0 }
     ];
 
     if (stage >= 2) {
-      enemies.push(this.buildEnemy("Lobo Ágil", 18, 9, difficulty, 2));
-      enemies.push(this.buildEnemy("Xamã", 20, 5, difficulty, 3, false, "support"));
+      enemies.push({ ...this.buildEnemy("Lobo Ágil", 18, 9, difficulty, 2), positionIndex: 0 });
+      enemies.push({ ...this.buildEnemy("Xamã", 20, 5, difficulty, 3, false, "support"), positionIndex: 0 });
     }
 
     const isBossStage = stage === gameState.maxStage;
     if (isBossStage) {
-      enemies.push(this.buildEnemy("Chefe: Juggernaut", 90, 16, difficulty * 1.6, 4, true, "boss"));
+      enemies.push({ ...this.buildEnemy("Chefe: Juggernaut", 90, 16, difficulty * 1.6, 4, true, "boss"), positionIndex: 0 });
     }
 
     return enemies;
@@ -764,6 +788,11 @@ class GameEngine {
       return gameState;
     }
 
+    // garante path
+    const path = gameState.path && gameState.path.length ? gameState.path : this.buildDefaultPath();
+    gameState.path = path;
+    gameState.enemies = (gameState.enemies || []).sort((a, b) => (b.positionIndex || 0) - (a.positionIndex || 0));
+
     // Chefe usa habilidades
     const boss = gameState.enemies.find(e => e.boss);
     if (boss) {
@@ -780,8 +809,8 @@ class GameEngine {
       }
       if (boss.bossSkills?.includes("gobcall")) {
         const difficulty = gameState.stage + gameState.map * 2;
-        const gob1 = this.buildEnemy("Goblin", 12, 4, difficulty, 3);
-        const gob2 = this.buildEnemy("Goblin", 12, 4, difficulty, 3);
+        const gob1 = { ...this.buildEnemy("Goblin", 12, 4, difficulty, 3), positionIndex: 0 };
+        const gob2 = { ...this.buildEnemy("Goblin", 12, 4, difficulty, 3), positionIndex: 0 };
         gameState.enemies.push(gob1, gob2);
         log.push("Chamado dos Goblins: 2 goblins extras entraram em campo!");
         boss.bossSkills = boss.bossSkills.filter(s => s !== "gobcall");
@@ -912,10 +941,8 @@ class GameEngine {
     totalAttack += (siegeAttack * siegeMult) + (cavalryAttack * troopMult) + (infantryAttack * troopMult);
 
     if (gameState.enemies.length > 0 && totalAttack > 0) {
-
       const fastestEnemy = [...gameState.enemies].sort((a, b) => (b.speed || 0) - (a.speed || 0))[0];
       if (fastestEnemy && (fastestEnemy.speed || 0) >= 9) {
-
         const preDmg = Math.max(0, Math.round(fastestEnemy.attack * 0.8) - (gameState.castle.defense_bonus || 0));
         if (preDmg > 0) {
           gameState.castle.hp = Math.max(0, gameState.castle.hp - preDmg);
@@ -932,6 +959,26 @@ class GameEngine {
         this.grantEnemyRewards(target, log);
         gameState.enemies.shift();
       }
+    }
+
+    // Movimento no path
+    const hitsCastle = [];
+    gameState.enemies.forEach(e => {
+      e.positionIndex = (e.positionIndex || 0) + (e.speed || 1);
+      if (e.positionIndex >= path.length) {
+        hitsCastle.push(e);
+      }
+    });
+
+    if (hitsCastle.length > 0) {
+      hitsCastle.forEach(e => {
+        const dmg = Math.max(0, Math.round(e.attack * hasteDebuff) - (defenseMult || 0));
+        if (dmg > 0) {
+          gameState.castle.hp = Math.max(0, gameState.castle.hp - dmg);
+        }
+      });
+      log.push(`💥 ${hitsCastle.length} inimigo(s) atingiram o castelo!`);
+      gameState.enemies = gameState.enemies.filter(e => !hitsCastle.includes(e));
     }
 
     let castleDamage = 0;
