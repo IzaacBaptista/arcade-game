@@ -16,6 +16,7 @@ function shortageMessage(required) {
 class GameEngine {
   constructor() {
     this.enemySeq = 0;
+    this.gridSize = 9;
     this.mapLayouts = [
       { name: "Vale Sereno", paths: 2, effects: { enemySlow: 0.08, towerBuff: 0.05, obstacles: ["lama", "pedras"] } },
       { name: "Desfiladeiro Sombrio", paths: 3, effects: { enemySlow: 0.12, towerBuff: 0.0, obstacles: ["neblina", "raízes"] } },
@@ -41,6 +42,19 @@ class GameEngine {
       fresh.difficulty = gameState.difficulty;
     }
     fresh.mapLayout = this.pickLayout(fresh.map);
+    fresh.heroRoster = JSON.parse(JSON.stringify(gameState.heroRoster || initialState.heroRoster));
+    const currentHeroKey = gameState.hero?.key || fresh.hero.key || fresh.heroRoster[0]?.key;
+    const heroFromRoster = fresh.heroRoster.find(h => h.key === currentHeroKey) || fresh.heroRoster[0];
+    if (heroFromRoster) {
+      fresh.hero = {
+        ...fresh.hero,
+        ...heroFromRoster,
+        key: heroFromRoster.key,
+        xp: heroFromRoster.xp || 0,
+        level: heroFromRoster.level || 1,
+        cooldown: 0
+      };
+    }
 
     if (keepMap) {
       // mantém inventário acumulado
@@ -71,6 +85,7 @@ class GameEngine {
   }
 
   status() {
+    this.ensureUnlocks();
     return gameState;
   }
 
@@ -83,6 +98,73 @@ class GameEngine {
     if (lvl === "easy") return { enemy: 0.85, resource: 1.15, damageTaken: 0.9 };
     if (lvl === "hard") return { enemy: 1.25, resource: 0.9, damageTaken: 1.1 };
     return { enemy: 1.0, resource: 1.0, damageTaken: 1.0 };
+  }
+
+  ensureUnlocks() {
+    if (!gameState.vault) gameState.vault = JSON.parse(JSON.stringify(initialState.vault));
+    if (!gameState.vault.rare) gameState.vault.rare = JSON.parse(JSON.stringify(initialState.vault.rare));
+    if (!gameState.hero) gameState.hero = JSON.parse(JSON.stringify(initialState.hero));
+    if (!gameState.heroRoster) gameState.heroRoster = JSON.parse(JSON.stringify(initialState.heroRoster));
+    if (!gameState.path || !gameState.path.length) gameState.path = this.buildDefaultPath();
+    if (Array.isArray(gameState.enemies)) {
+      gameState.enemies = gameState.enemies.map(e => ({
+        ...e,
+        positionIndex: e.positionIndex ?? 0
+      }));
+    }
+
+    if (gameState.map >= 2) {
+      gameState.hero.beast = gameState.hero.beast || { unlocked: true, ready: true, activeTurns: 0 };
+      gameState.hero.beast.unlocked = true;
+      gameState.hero.beast.ready = gameState.hero.beast.ready ?? true;
+      gameState.hero.beast.activeTurns = gameState.hero.beast.activeTurns || 0;
+      gameState.vault.rare = (gameState.vault.rare || []).map(r => ({ ...r, unlocked: true }));
+    }
+
+    if (gameState.hero && gameState.heroRoster) {
+      const found = gameState.heroRoster.find(h => h.key === gameState.hero.key);
+      if (found) {
+        gameState.hero.name = found.name;
+        gameState.hero.role = found.role;
+        gameState.hero.icon = found.icon;
+        gameState.hero.xp = found.xp ?? gameState.hero.xp ?? 0;
+        gameState.hero.level = found.level ?? gameState.hero.level ?? 1;
+      }
+    }
+  }
+
+  gainXp(amount = 0) {
+    const inc = Math.max(0, amount);
+    gameState.xp = (gameState.xp || 0) + inc;
+    const heroKey = gameState.hero?.key;
+    if (heroKey && Array.isArray(gameState.heroRoster)) {
+      const h = gameState.heroRoster.find(hr => hr.key === heroKey);
+      if (h) {
+        h.xp = (h.xp || 0) + inc;
+        h.level = 1 + Math.floor(h.xp / 120);
+        gameState.hero.xp = h.xp;
+        gameState.hero.level = h.level;
+      }
+    }
+  }
+
+  selectHero(key) {
+    this.ensureUnlocks();
+    const roster = gameState.heroRoster || [];
+    const hero = roster.find(h => h.key === key);
+    if (!hero) return { msg: "Herói não encontrado.", state: this.status() };
+    gameState.hero = {
+      key: hero.key,
+      name: hero.name,
+      role: hero.role,
+      icon: hero.icon,
+      xp: hero.xp || 0,
+      level: hero.level || 1,
+      charges: hero.charges || 2,
+      cooldown: 0,
+      beast: gameState.hero?.beast || { unlocked: gameState.map >= 2, ready: true, activeTurns: 0 }
+    };
+    return { msg: `Herói trocado para ${hero.name}.`, state: this.status() };
   }
 
   buildEnemy(name, baseHp, baseAttack, difficulty, distance, isBoss = false, role = "normal") {
@@ -209,7 +291,7 @@ class GameEngine {
     gameState.resources.energy += Math.round(energy * resMod);
     gameState.resources.stone += Math.round(stone * resMod);
     gameState.resources.iron += Math.round(iron * resMod);
-    gameState.xp += 5 + gameState.stage;
+    this.gainXp(5 + gameState.stage);
     gameState.actionLocks.lastCollectTurn = gameState.turn;
     log.push(`Coletou +${gold} ouro, +${wood} madeira, +${food} comida, +${energy} energia, +${stone} pedra, +${iron} ferro.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -278,7 +360,7 @@ class GameEngine {
     this.resetState(true);
     gameState.status = "ongoing";
     gameState.enemies = this.generateEnemies(gameState.stage);
-    gameState.xp += 50 + gameState.map * 20;
+    this.gainXp(50 + gameState.map * 20);
     return { msg: `Novo mapa iniciado (${gameState.map}).`, state: this.status() };
   }
 
@@ -626,7 +708,7 @@ class GameEngine {
     gameState.vault.jewels += gainJewels;
     gameState.resources.gold += gainGold;
     gameState.resources.wood += gainWood;
-    gameState.xp += 10;
+    this.gainXp(10);
 
     log.push(`Baú: +${gainJewels} joias, +${gainGold} ouro, +${gainWood} madeira.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -984,7 +1066,7 @@ class GameEngine {
     gameState.resources.gold += goldGain;
     log.push(`Recompensa: +${goldGain} ouro de ${enemy.name}.`);
     const xpGain = Math.max(5, Math.round(goldGain * 2));
-    gameState.xp += xpGain;
+    this.gainXp(xpGain);
 
     this.rewardForEnemy(enemy, log);
     // desbloqueia itens raros conforme progressão

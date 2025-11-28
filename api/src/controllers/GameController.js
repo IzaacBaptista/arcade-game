@@ -117,5 +117,10 @@ module.exports = {
 
   nextMap(req, res) {
     return withUserState(req, res, () => GameEngine.nextMap());
+  },
+
+  selectHero(req, res) {
+    const { key } = req.body || {};
+    return withUserState(req, res, () => GameEngine.selectHero(key));
   }
 };

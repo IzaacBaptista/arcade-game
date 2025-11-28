@@ -17,6 +17,8 @@ export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
   const [autoStatus, setAutoStatus] = useState("Auto parado");
   const [vaultOpen, setVaultOpen] = useState(false);
+  const [heroModalOpen, setHeroModalOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [showHelper, setShowHelper] = useState(true);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
@@ -41,6 +43,7 @@ export default function Game() {
     runCastSpell,
     runApplyRune,
     runSummonBeast,
+    runSelectHero,
     runCollectTreasure,
     runUsePotion,
     runUseRareItem,
@@ -164,6 +167,7 @@ export default function Game() {
     armory = {},
     research = { tower: 0, troop: 0, siege: 0, defense: 0 },
     hero = { name: "Herói", charges: 0, cooldown: 0 },
+    heroRoster = [],
     vault = { jewels: 0, potions: {} },
   } = state || {};
 
@@ -282,6 +286,35 @@ export default function Game() {
           </div>
         </div>
         <div className="ks-hero-actions">
+          <div
+            className={`ks-profile-card ${profileOpen ? "open" : ""}`}
+            onClick={() => setProfileOpen(p => !p)}
+            style={{ cursor: "pointer" }}
+            title="Clique para ver detalhes do perfil"
+          >
+            <div className="ks-profile-header">
+              <span className="ks-profile-icon">{hero.icon || "🛡️"}</span>
+              <div>
+                <p className="ks-label">Herói ativo</p>
+                <strong className="ks-title">{hero.name || "Herói"}</strong>
+                <span className="ks-mini-label">{hero.role || "Role"}</span>
+              </div>
+            </div>
+            {profileOpen && (
+              <>
+                <div className="ks-profile-meta">
+                  <span className="ks-pill soft">Lv {hero.level ?? 1}</span>
+                  <span className="ks-pill gold">XP {hero.xp ?? 0}</span>
+                  <span className="ks-pill soft">Cargas {hero.charges ?? 0}</span>
+                </div>
+                <div className="ks-inline-actions" style={{ marginTop: 8 }}>
+                  <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); setHeroModalOpen(true); }}>Trocar herói</button>
+                  <button className="ks-btn ghost" onClick={(e) => e.stopPropagation()}>Configurações</button>
+                  <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); logout(); }}>Logout</button>
+                </div>
+              </>
+            )}
+          </div>
           <button className="ks-btn primary" onClick={runNextTurn} disabled={!isActive}>
             {isActive ? "Próximo turno" : "Ação indisponível"}
           </button>
@@ -300,9 +333,6 @@ export default function Game() {
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={() => { const saved = loadSaved(); if (saved) setAutoMode(false); }}>
               Continuar sessão
-            </button>
-            <button className="ks-btn ghost" onClick={logout}>
-              Logout
             </button>
             <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
               {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
@@ -357,7 +387,7 @@ export default function Game() {
             <span className="ks-pill soft">Fase {stage}</span>
             <span className="ks-pill soft">Mapa {map}</span>
             <span className="ks-pill soft">Streak {state.achievements?.winStreak ?? 0}</span>
-            <span className="ks-pill gold">XP {state.xp ?? 0}</span>
+            <span className="ks-pill gold">XP {hero.xp ?? state.xp ?? 0}</span>
             <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
             <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
@@ -535,6 +565,42 @@ export default function Game() {
           onUsePotion={runUsePotion}
           onUseRare={runUseRareItem}
         />
+      )}
+      {heroModalOpen && (
+        <div className="ks-modal-backdrop" onClick={() => setHeroModalOpen(false)}>
+          <div className="ks-modal" onClick={e => e.stopPropagation()}>
+            <div className="ks-modal-header">
+              <h3>Escolher herói</h3>
+              <button className="ks-btn ghost" onClick={() => setHeroModalOpen(false)}>Fechar</button>
+            </div>
+            <div className="ks-hero-grid">
+              {(heroRoster || []).map(h => (
+                <div key={h.key} className={`ks-hero-card ${hero.key === h.key ? "active" : ""}`}>
+                  <div className="ks-hero-card-head">
+                    <span className="ks-hero-icon">{h.icon}</span>
+                    <div>
+                      <strong className="ks-title">{h.name}</strong>
+                      <p className="ks-mini-label">{h.role}</p>
+                    </div>
+                    {hero.key === h.key && <span className="ks-chip success">Ativo</span>}
+                  </div>
+                  <div className="ks-hero-card-body">
+                    <span className="ks-pill soft">Lv {h.level ?? 1}</span>
+                    <span className="ks-pill gold">XP {h.xp ?? 0}</span>
+                    <span className="ks-mini-label">Cargas {h.charges ?? 0}</span>
+                  </div>
+                  <button
+                    className="ks-btn primary"
+                    disabled={hero.key === h.key}
+                    onClick={() => { runSelectHero(h.key); setHeroModalOpen(false); }}
+                  >
+                    {hero.key === h.key ? "Selecionado" : "Ativar"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
   </div>
 );

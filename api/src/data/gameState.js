@@ -1,3 +1,5 @@
+const heroesData = require("./heroes");
+
 const initialState = {
   map: 1,
   maxStage: 3,
@@ -43,12 +45,28 @@ const initialState = {
     defense: 0
   },
 
-  hero: {
-    name: "Aurora",
-    charges: 2,
-    cooldown: 0,
-    beast: { unlocked: false, ready: true, activeTurns: 0 }
-  },
+  heroRoster: heroesData.map(h => ({
+    ...h,
+    key: h.id,
+    xp: 0,
+    level: 1,
+    charges: h.charges || 2
+  })),
+
+  hero: (() => {
+    const first = heroesData[0] || { id: "hero", name: "Herói", icon: "🛡️", role: "Guardião" };
+    return {
+      key: first.id,
+      name: first.name,
+      role: first.role || "Herói",
+      icon: first.icon || "🛡️",
+      xp: 0,
+      level: 1,
+      charges: first.charges || 2,
+      cooldown: 0,
+      beast: { unlocked: false, ready: true, activeTurns: 0 }
+    };
+  })(),
 
   effects: {
     castleShield: 0,

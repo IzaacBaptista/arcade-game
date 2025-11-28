@@ -135,6 +135,15 @@ export async function summonBeast() {
   return res.json();
 }
 
+export async function selectHero(key) {
+  const res = await fetch(`${API_URL}/hero/select`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ key })
+  });
+  return res.json();
+}
+
 export async function healCastle() {
   const res = await fetch(`${API_URL}/castle/heal`, { method: "POST", headers: authHeaders() });
   return res.json();

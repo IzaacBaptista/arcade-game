@@ -28,5 +28,6 @@ router.post("/tower/add", GameController.addTower);
 router.post("/castle/wall/upgrade", GameController.upgradeWall);
 router.post("/reset", GameController.reset);
 router.post("/map/next", GameController.nextMap);
+router.post("/hero/select", GameController.selectHero);
 
 module.exports = router;

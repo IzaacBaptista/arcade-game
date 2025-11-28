@@ -18,6 +18,7 @@ import {
   consumePotion,
   useRareItem as consumeRareItem,
   summonBeast,
+  selectHero,
   healCastle,
   resetGame,
   nextMap,
@@ -152,6 +153,12 @@ export function useGame() {
     updateFrom(data);
   }
 
+  async function runSelectHero(key) {
+    const data = await selectHero(key);
+    updateFrom(data);
+    return data;
+  }
+
   async function runBuildArmory(type, amount) {
     return buildArmory(type, amount).then(d => { updateFrom(d); return d; });
   }
@@ -196,6 +203,7 @@ export function useGame() {
     runHealCastle,
     runCastSpell,
     runApplyRune,
+    runSelectHero,
     runCollectTreasure,
     runUsePotion,
     runUseRareItem,

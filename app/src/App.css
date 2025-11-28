@@ -717,3 +717,100 @@
   gap: 6px;
   align-items: center;
 }
+
+/* Perfil e heróis */
+.ks-profile-card {
+  background: linear-gradient(135deg, #fff8ed, #f4d9b1);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  margin-bottom: 10px;
+}
+
+.ks-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ks-profile-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff4e0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.ks-profile-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.ks-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.ks-modal {
+  width: min(900px, 95vw);
+  max-height: 90vh;
+  background: #fffdf8;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+  overflow-y: auto;
+}
+
+.ks-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ks-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.ks-hero-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.ks-hero-card.active {
+  border-color: #f59e0b;
+  box-shadow: 0 10px 26px rgba(245, 158, 11, 0.25);
+}
+
+.ks-hero-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ks-hero-card-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.ks-profile-card.open {
+  border: 1px solid rgba(0,0,0,0.08);
+}
