@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import Castle from "../components/Castle";
 import Towers from "../components/Towers";
 import Troops from "../components/Troops";
+import TroopsPreview from "../components/TroopsPreview";
+import TroopsModal from "../components/TroopsModal";
 import Enemies from "../components/Enemies";
 import Log from "../components/Log";
 import Builders from "../components/Builders";
@@ -23,6 +25,7 @@ export default function Game() {
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [armoryOpen, setArmoryOpen] = useState(false);
+  const [troopsOpen, setTroopsOpen] = useState(false);
   const [showHelper, setShowHelper] = useState(true);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
@@ -534,7 +537,7 @@ export default function Game() {
               <h2>Tropas</h2>
             </div>
           </div>
-          <Troops troops={troops} onTrain={runTrainTroops} onUpgrade={runUpgradeTroops} />
+          <TroopsPreview troops={troops} onOpen={() => setTroopsOpen(true)} />
         </section>
 
         <section className="ks-panel barracks-panel">
@@ -608,6 +611,14 @@ export default function Game() {
           onClose={() => setArmoryOpen(false)}
           onBuild={(type, amount) => runBuildArmory(type, amount)}
           onUpgrade={runUpgradeArmory}
+        />
+      )}
+      {troopsOpen && (
+        <TroopsModal
+          troops={troops}
+          onClose={() => setTroopsOpen(false)}
+          onTrain={runTrainTroops}
+          onUpgrade={runUpgradeTroops}
         />
       )}
   </div>

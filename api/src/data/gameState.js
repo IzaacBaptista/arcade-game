@@ -139,7 +139,13 @@ const initialState = {
 
   troops: {
     soldiers: { level: 1, qty: 10, attack: 2, hp: 10, speed: 5, crit: 5, critDmg: 150, armor: 2, pen: 1 },
-    archers: { level: 1, qty: 5, attack: 4, hp: 6, speed: 7, crit: 10, critDmg: 170, armor: 1, pen: 2 }
+    archers: { level: 1, qty: 5, attack: 4, hp: 6, speed: 7, crit: 10, critDmg: 170, armor: 1, pen: 2 },
+    lancers: { level: 1, qty: 3, attack: 6, hp: 8, speed: 6, crit: 7, critDmg: 160, armor: 3, pen: 1 },
+    assassins: { level: 1, qty: 2, attack: 8, hp: 5, speed: 9, crit: 15, critDmg: 200, armor: 1, pen: 3 },
+    berserkers: { level: 1, qty: 1, attack: 10, hp: 12, speed: 4, crit: 5, critDmg: 150, armor: 4, pen: 2 },
+    giants: { level: 1, qty: 0, attack: 15, hp: 20, speed: 2, crit: 3, critDmg: 130, armor: 5, pen: 3 },
+    elephants: { level: 1, qty: 0, attack: 18, hp: 25, speed: 2, crit: 2, critDmg: 120, armor: 6, pen: 4 },
+    imps: { level: 1, qty: 0, attack: 5, hp: 4, speed: 8, crit: 12, critDmg: 180, armor: 1, pen: 2 }
   },
 
   armory: {
