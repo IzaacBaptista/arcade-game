@@ -5,11 +5,12 @@
 # 🏰 Kingshot Terminal  
 ### A Tower Defense Experience • Node.js API + React Front
 
-Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**, usando:
+Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**, agora com **TypeScript em migração gradual**, usando:
 
-🚀 **Backend**: Node.js + Express  
-🎨 **Frontend**: React + CSS customizado  
-🧠 **Game Engine própria**: lógica de turnos, fases, torres, tropas e inimigos
+🚀 **Backend**: Node.js + Express (com TypeScript em migração gradual)  
+🎨 **Frontend**: React + CSS customizado (migrando para `.tsx`)  
+🧠 **Game Engine própria**: lógica de turnos, fases, torres, tropas e inimigos  
+📝 **TypeScript**: tipagem progressiva no back e front para mais segurança e clareza
 
 <img width="1541" height="1452" alt="screencapture-localhost-3000-2025-11-27-09_10_29" src="https://github.com/user-attachments/assets/952c72bd-0bc2-4965-ad48-705c5d4e3316" />
 
@@ -38,24 +39,26 @@ Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**
 ```
 arcade-game/
 │
-├── api/                 # Backend Node (Express + Game Engine)
+├── api/                 # Backend Node (Express + Game Engine, TS-ready)
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── data/
 │   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── server.js
+│   │   ├── routes/      # agora .ts
+│   │   ├── services/    # GameEngine.ts, saveStore.ts
+│   │   ├── types/       # GameState, Hero, ApiResponse
+│   │   └── server.js    # usa ts-node/register
 │
-└── app/                 # Frontend React estilizado como jogo mobile
+└── app/                 # Frontend React estilizado como jogo mobile (TS em progresso)
     ├── public/
     └── src/
-        ├── api/
+        ├── api/         # agora em .ts com jsonFetch resiliente
         ├── assets/
-        ├── components/
-        ├── hooks/
-        ├── pages/
-        ├── App.jsx
+        ├── components/  # renomeados para .tsx (com @ts-nocheck temporário)
+        ├── hooks/       # useGame.ts tipado
+        ├── pages/       # agora em .tsx
+        ├── types/       # GameState, Hero, ApiResponse compartilhados
+        ├── App.jsx      # será migrado em breve
         ├── App.css
         └── index.js
 ```
@@ -70,6 +73,7 @@ arcade-game/
 cd api
 npm install
 npm start
+# tipagem: npm run typecheck   # valida TS sem emitir
 ```
 
 A API sobe em:
@@ -86,6 +90,7 @@ Em outro terminal:
 cd app
 npm install
 npm start
+# tipagem: npm run typecheck   # valida TS sem emitir
 ```
 
 O jogo abre automaticamente em:
@@ -111,6 +116,11 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 ---
 
 ## 🎯 Funcionalidades Principais
+### 🆕 Novidades recentes
+- **Migração para TypeScript**: backend (GameEngine, saveStore, db, rotas) e frontend (API client, hooks, componentes/páginas) em `.ts/.tsx`, com tipos compartilhados (GameState, Hero, ApiResponse) em `api/src/types` e `app/src/types`.
+- **Scripts de typecheck**: `npm run typecheck` no `api/` e no `app/` para validar tipagem sem build.
+- **Camada de fetch resiliente**: `jsonFetch` em todas as chamadas do front evita crash quando a API estiver offline e retorna mensagem amigável.
+- **Compatibilidade incremental**: componentes de UI seguem com `@ts-nocheck` temporário enquanto tipagem é concluída.
 
 ### 🏰 Castelo
 - Vida, defesa e cura com energia + comida (buffada por curandeiros/eventos)
