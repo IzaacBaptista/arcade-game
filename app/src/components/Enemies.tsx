@@ -1,11 +1,16 @@
 // @ts-nocheck
 export default function Enemies({ enemies }) {
+  const list = (enemies || []).filter(Boolean);
   return (
     <div className="ks-card-grid">
-      {enemies.length === 0 ? (
+      {list.length === 0 ? (
         <div className="ks-empty">Nenhum inimigo no momento.</div>
       ) : (
-        enemies.map(e => (
+        list.map(e => {
+          const hp = e?.hp ?? 0;
+          const max = e?.max_hp || hp || 1;
+          const pct = Math.max(0, Math.min(100, (hp / max) * 100));
+          return (
           <div key={e.id} className={`ks-card enemy-card ${e.boss ? "boss" : ""}`}>
             <div className="ks-card-head">
               <span className="ks-icon-circle danger ks-enemy-icon">
@@ -14,12 +19,12 @@ export default function Enemies({ enemies }) {
 
               <div>
                 <p className="ks-label">{e.name}</p>
-                <strong className="ks-title">HP {e.hp}</strong>
+                <strong className="ks-title">HP {hp}</strong>
 
                 <div className="ks-bar small">
                   <div
                     className="ks-bar-fill hp"
-                    style={{ width: `${Math.max(0, Math.min(100, ((e.hp ?? 0) / (e.max_hp || e.hp || 1)) * 100))}%` }}
+                    style={{ width: `${pct}%` }}
                   ></div>
                 </div>
               </div>
@@ -36,7 +41,8 @@ export default function Enemies({ enemies }) {
               <div className="ks-chip boss-tag">👑 BOSS</div>
             )}
           </div>
-        ))
+        );
+        })
       )}
     </div>
   );

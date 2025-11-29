@@ -209,7 +209,12 @@ class GameEngine {
       "Lobo Ágil": "🐺",
       "Chefe: Juggernaut": "👑",
       "Batedor Alado": "🦅",
-      "Xamã": "🧙"
+      "Xamã": "🧙",
+      "Slime": "🟢",
+      "Kobold": "🐉",
+      "Golem": "🪨",
+      "Wyvern": "🐲",
+      "Necromante": "💀"
     };
     return map[name] || "👹";
   }
@@ -219,7 +224,12 @@ class GameEngine {
     const baseRewards = {
       "Goblin": 5,
       "Ork": 12,
-      "Lobo Ágil": 9
+      "Lobo Ágil": 9,
+      "Slime": 4,
+      "Kobold": 7,
+      "Golem": 14,
+      "Wyvern": 16,
+      "Necromante": 18
     };
     return baseRewards[name] ?? 6;
   }
@@ -229,12 +239,20 @@ class GameEngine {
     const enemies = [
       this.buildEnemy("Goblin", 12, 4, difficulty, 3),
       this.buildEnemy("Ork", 28, 7, difficulty, 4, false, "tank"),
-      this.buildEnemy("Batedor Alado", 14, 6, difficulty, 2, false, "flyer")
+      this.buildEnemy("Batedor Alado", 14, 6, difficulty, 2, false, "flyer"),
+      this.buildEnemy("Slime", 8, 3, difficulty, 3),
+      this.buildEnemy("Kobold", 16, 5, difficulty, 3)
     ];
 
     if (stage >= 2) {
       enemies.push(this.buildEnemy("Lobo Ágil", 18, 9, difficulty, 2));
       enemies.push(this.buildEnemy("Xamã", 20, 5, difficulty, 3, false, "support"));
+      enemies.push(this.buildEnemy("Golem", 30, 10, difficulty * 1.2, 4, false, "tank"));
+    }
+
+    if (stage >= 3) {
+      enemies.push(this.buildEnemy("Wyvern", 22, 11, difficulty * 1.3, 2, false, "flyer"));
+      enemies.push(this.buildEnemy("Necromante", 18, 8, difficulty * 1.25, 3, false, "support"));
     }
 
     const isBossStage = stage === gameState.maxStage;
