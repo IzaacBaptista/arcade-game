@@ -39,6 +39,7 @@ Um mini–jogo estilo **tower defense** totalmente construído em **JavaScript**
 ```
 arcade-game/
 │
+├── docker-compose.yml  # Orquestra API, Front e Postgres
 ├── api/                 # Backend Node (Express + Game Engine, TS-ready)
 │   ├── src/
 │   │   ├── controllers/
@@ -48,9 +49,11 @@ arcade-game/
 │   │   ├── services/    # GameEngine.ts, saveStore.ts
 │   │   ├── types/       # GameState, Hero, ApiResponse
 │   │   └── server.js    # usa ts-node/register
+│   ├── Dockerfile
 │
 └── app/                 # Frontend React estilizado como jogo mobile (TS em progresso)
     ├── public/
+    ├── Dockerfile
     └── src/
         ├── api/         # agora em .ts com jsonFetch resiliente
         ├── assets/
@@ -58,7 +61,7 @@ arcade-game/
         ├── hooks/       # useGame.ts tipado
         ├── pages/       # agora em .tsx
         ├── types/       # GameState, Hero, ApiResponse compartilhados
-        ├── App.jsx      # será migrado em breve
+        ├── App.tsx      # será migrado em breve
         ├── App.css
         └── index.js
 ```
@@ -99,7 +102,23 @@ O jogo abre automaticamente em:
 http://localhost:3000
 ```
 
-### 3 Instalando o banco de dados (Postgres)
+### 3) Rodando tudo com Docker
+
+1. Crie `api/.env` com as credenciais para o Postgres do compose:
+   ```
+   DATABASE_URL=postgres://kingshot:kingshot123123@db:5432/kingshot
+   JWT_SECRET=dev-secret-change-me
+   ```
+2. Suba tudo:
+   ```bash
+   docker-compose up --build
+   ```
+3. Serviços:
+   - API: http://localhost:8000
+   - Front: http://localhost:3000
+   - Postgres: localhost:5432 (user: kingshot / pass: kingshot123123 / db: kingshot)
+
+### 4) Instalando o banco de dados (Postgres)
 
 Use o Docker para rodar um container Postgres localmente:
 
