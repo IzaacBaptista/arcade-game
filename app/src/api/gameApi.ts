@@ -164,6 +164,10 @@ export async function nextMap() {
   return jsonFetch<ApiResponse<GameState>>(`${API_URL}/map/next`, { method: "POST", headers: authHeaders() });
 }
 
+export async function clearLog() {
+  return jsonFetch<ApiResponse<GameState>>(`${API_URL}/log/clear`, { method: "POST", headers: authHeaders() });
+}
+
 type AuthResponse = { token?: string; msg?: string };
 
 export async function login(email: string, password: string): Promise<AuthResponse> {

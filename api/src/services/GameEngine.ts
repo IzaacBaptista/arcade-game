@@ -308,7 +308,10 @@ class GameEngine {
     const costWood = 35 + 8 * gameState.stage + 4 * gameState.map;
 
     if (gameState.resources.gold < costGold || gameState.resources.wood < costWood) {
-      return { msg: shortageMessage({ gold: costGold, wood: costWood }), state: this.status() };
+      const msg = shortageMessage({ gold: costGold, wood: costWood });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -335,7 +338,10 @@ class GameEngine {
 
     const costWood = 45 + gameState.castle.wall_level * 20 + gameState.map * 5;
     if (gameState.resources.wood < costWood) {
-      return { msg: shortageMessage({ wood: costWood }), state: this.status() };
+      const msg = shortageMessage({ wood: costWood });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.wood -= costWood;
@@ -378,7 +384,10 @@ class GameEngine {
     const cost = 40 + (tower.level * 20);
 
     if (gameState.resources.gold < cost) {
-      return { msg: shortageMessage({ gold: cost }), state: this.status() };
+      const msg = shortageMessage({ gold: cost });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= cost;
@@ -401,7 +410,10 @@ class GameEngine {
     const cost = type === "soldiers" ? 5 * amount : 8 * amount;
 
     if (gameState.resources.gold < cost) {
-      return { msg: "Ouro insuficiente.", state: this.status() };
+      const msg = "Ouro insuficiente.";
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= cost;
@@ -489,7 +501,10 @@ class GameEngine {
     const costFood = (20 + gameState.stage * 5 + gameState.map * 3) * amount;
 
     if (gameState.resources.gold < costGold || gameState.resources.food < costFood) {
-      return { msg: shortageMessage({ gold: costGold, food: costFood }), state: this.status() };
+      const msg = shortageMessage({ gold: costGold, food: costFood });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -515,7 +530,10 @@ class GameEngine {
     const cost = 30 + troop.level * 15 + gameState.map * 5;
 
     if (gameState.resources.gold < cost) {
-      return { msg: "Ouro insuficiente para evoluir tropas.", state: this.status() };
+      const msg = "Ouro insuficiente para evoluir tropas.";
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= cost;
@@ -542,7 +560,10 @@ class GameEngine {
     const costEnergy = 30 + current * 12;
 
     if (gameState.resources.gold < costGold || gameState.resources.wood < costWood || gameState.resources.energy < costEnergy) {
-      return { msg: shortageMessage({ gold: costGold, wood: costWood, energy: costEnergy }), state: this.status() };
+      const msg = shortageMessage({ gold: costGold, wood: costWood, energy: costEnergy });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -662,7 +683,10 @@ class GameEngine {
 
     const lacks = Object.entries(totalCost).find(([res, val]) => (gameState.resources[res] ?? 0) < val);
     if (lacks) {
-      return { msg: shortageMessage(totalCost), state: this.status() };
+      const msg = shortageMessage(totalCost);
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= totalCost.gold;
@@ -686,7 +710,10 @@ class GameEngine {
     const costEnergy = 35 + (gameState.runes[type] || 0) * 20;
 
     if (gameState.resources.gold < costGold || gameState.resources.energy < costEnergy) {
-      return { msg: shortageMessage({ gold: costGold, energy: costEnergy }), state: this.status() };
+      const msg = shortageMessage({ gold: costGold, energy: costEnergy });
+      log.push(msg);
+      gameState.log = [...log, ...gameState.log].slice(0, 10);
+      return { msg, state: this.status() };
     }
 
     gameState.resources.gold -= costGold;
@@ -1101,6 +1128,11 @@ class GameEngine {
     gameState.castle.hp = Math.min(gameState.castle.max_hp, gameState.castle.hp + heal);
 
     log.push(`${enemy.name} derrubado! +${energyGain} energia e +${heal} vida para o castelo.`);
+  }
+
+  clearLog() {
+    gameState.log = [];
+    return { msg: "Log limpo.", state: this.status() };
   }
 
   setState(stateObj) {

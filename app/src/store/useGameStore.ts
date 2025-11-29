@@ -27,6 +27,7 @@ import {
   nextMap,
   buildArmory,
   upgradeArmory,
+  clearLog,
 } from "../api/gameApi";
 
 type GameApiResult = ApiResponse<GameState> | GameState | null;
@@ -62,6 +63,7 @@ type GameStore = {
   runUpgradeArmory: (type: string) => Promise<GameApiResult>;
   runResetGame: () => Promise<GameApiResult>;
   runNextMap: () => Promise<GameApiResult>;
+  runClearLog: () => Promise<GameApiResult>;
 };
 
 const parseState = (data: GameApiResult): GameState | null => {
@@ -141,6 +143,7 @@ const createStore: StateCreator<GameStore> = (set, get) => {
         runUpgradeArmory: async (type: string) => runWithState(() => upgradeArmory(type)),
         runResetGame: async () => runWithState(() => resetGame()),
         runNextMap: async () => runWithState(() => nextMap()),
+        runClearLog: async () => runWithState(() => clearLog()),
       };
     };
 

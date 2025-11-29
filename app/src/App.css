@@ -27,7 +27,7 @@
 }
 
 .ks-layout {
-  width: min(1380px, 100%);
+  width: min(1380px, 100%); /* here */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -434,6 +434,12 @@
 
 .ks-btn:hover { transform: translateY(-2px); }
 .ks-btn:active { transform: translateY(0); }
+
+.trash {
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
 
 .ks-log {
   display: grid;

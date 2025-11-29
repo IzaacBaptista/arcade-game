@@ -122,5 +122,9 @@ module.exports = {
   selectHero(req, res) {
     const { key } = req.body || {};
     return withUserState(req, res, () => GameEngine.selectHero(key));
+  },
+
+  clearLog(req, res) {
+    return withUserState(req, res, () => GameEngine.clearLog());
   }
 };

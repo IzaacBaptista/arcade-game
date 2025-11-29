@@ -60,6 +60,7 @@ export default function Game() {
     runNextMap,
     loadSaved,
     loadStatus,
+    runClearLog,
   } = useGame();
 
   useEffect(() => {
@@ -553,7 +554,7 @@ export default function Game() {
             <h2>Relatório</h2>
           </div>
         </div>
-        <Log log={log} />
+        <Log log={log} onClear={runClearLog} />
       </section>
     </div>
       {vaultOpen && (

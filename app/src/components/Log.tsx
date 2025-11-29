@@ -1,5 +1,5 @@
 // @ts-nocheck
-export default function Log({ log }) {
+export default function Log({ log, onClear }) {
   const grouped = [];
   for (const line of log) {
     const last = grouped[grouped.length - 1];
@@ -12,6 +12,10 @@ export default function Log({ log }) {
 
   return (
     <div className="ks-log">
+      <div className="ks-inline-actions" style={{ justifyContent: "flex-end", marginBottom: 6 }}>
+        {/* add icon trash*/}
+        <button className="trash" onClick={onClear}> 🗑️ </button>
+      </div>
       {grouped.length === 0 && <div className="ks-empty">Nenhuma atividade registrada ainda.</div>}
       {grouped.map((entry, idx) => (
         <div key={idx} className="ks-log-line">
