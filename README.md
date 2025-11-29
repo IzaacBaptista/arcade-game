@@ -121,6 +121,10 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 - **Scripts de typecheck**: `npm run typecheck` no `api/` e no `app/` para validar tipagem sem build.
 - **Camada de fetch resiliente**: `jsonFetch` em todas as chamadas do front evita crash quando a API estiver offline e retorna mensagem amigável.
 - **Compatibilidade incremental**: componentes de UI seguem com `@ts-nocheck` temporário enquanto tipagem é concluída.
+- **Novos heróis com skills**: Guardião Real (escudo/muralha), Arqueira Élfica (chuva de flechas/crit), Alquimista Arcano (buffs de recursos), Mestre das Feras (fera sempre pronta e dano físico).
+- **Biomas e layouts**: mapas possuem efeitos (lentidão inimiga, buff de torre, obstáculos) e influenciam o fluxo da onda.
+- **Itens raros & fera**: progressão desbloqueia anel, grimório, armadura, relógio e invocação de fera gigante por mapa.
+- **Persistência por usuário**: saves individuais em Postgres + JWT; reset e próximo mapa preservam inventário e progressos-chave.
 
 ### 🏰 Castelo
 - Vida, defesa e cura com energia + comida (buffada por curandeiros/eventos)
@@ -134,6 +138,7 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 - Conselheiro IA com dicas contextuais e toggle ON/OFF
 - Modal de tesouros/poções/itens raros com barras de duração; baú com joias
 - Mapas trocam visual por bioma; obstáculos/buffs/debuffs exibidos
+- Modal de troca de herói com níveis, XP e cargas por herói
 
 ### 🏹 Torres
 - Construção de novas torres
@@ -154,6 +159,7 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 - Fabricação e melhoria de: catapultas, canhões antigos, cavalos, cavalaria, escudos e lanças
 - Armas de cerco e cavalaria adicionam dano extra; escudos somam defesa do castelo
 - Runas aplicam buffs nas torres; pesquisas de cerco e engenharia aumentam dano
+- Armory também inclui cannons, catapults e progressão por nível
 
 ### 👹 Inimigos
 - HP, max HP (com barra), ícone, ataque, distância e recompensa em ouro
@@ -175,6 +181,8 @@ Mecânica a cada turno:
 - Ouro, madeira, comida, energia, pedra, ferro, população
 - Coleta padrão e coleta de construtores (com retorno decrescente)
 - Custos dinâmicos por fase/mapa e mapa com efeitos (ralentamento/buff)
+- Tiles de construtor com riqueza variada para otimizar alocação
+- Loot buff/achievements para recompensas extras
 
 ### 🎒 Tesouros & Poções
 - Baú com joias, artefatos (placeholder), poções (cura, energia, saque) e itens raros
@@ -188,8 +196,12 @@ Mecânica a cada turno:
 - Vitória do mapa ao vencer todas as fases, com opção de próximo mapa
 
 ### 🖼 Preview
-Você pode substituir quando quiser por prints reais do seu jogo.
 
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
 ---
 
 ## 📡 Rotas da API
