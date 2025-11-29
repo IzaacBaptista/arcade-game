@@ -269,114 +269,110 @@ export default function Game() {
   return (
     <div className="ks-layout">
       <header className="ks-hero">
-        <div className="ks-hero-text">
-          <p className="ks-eyebrow">Kingshot Command</p>
-          <h1>Mapa {map} • Fase {stage} • Turno {turn}</h1>
-          <div className="ks-pill-row" style={{ marginTop: 6, marginBottom: 6 }}>
-            <span className={`ks-pill ${status === "won" ? "gold" : status === "over" ? "hp" : "soft"}`}>
-              {gameWon ? "🎉 Vitória" : gameOver ? "☠️ Game Over" : "Em batalha"}
-            </span>
-          </div>
-          <p className="ks-subtitle">
-            Eleve muralhas, treine tropas e mantenha a linha enquanto os invasores avançam.
-          </p>
-          <div className="ks-pill-row">
-            <span className="ks-pill gold">🪙 Ouro {resources.gold ?? 0}</span>
-            <span className="ks-pill wood">🌲 Madeira {resources.wood ?? 0}</span>
-            <span className="ks-pill energy">⚡ Energia {resources.energy ?? 0}</span>
-            <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
-            <span className="ks-pill hp">❤️ {Math.round(castle.hp)} / {castle.max_hp}</span>
-            <span className="ks-pill soft" title="Streak de vitórias">🔥 Streak {state.achievements?.winStreak ?? 0}</span>
-            <span className="ks-pill stone">🪨 Pedra {resources.stone ?? 0}</span>
-            <span className="ks-pill iron">⛓️ Ferro {resources.iron ?? 0}</span>
-            <span className="ks-pill population">👥 Pop {resources.population ?? 0}</span>
-          </div>
-        </div>
-        <div className="ks-hero-actions">
-          <div
-            className={`ks-profile-card ${profileOpen ? "open" : ""}`}
-            onClick={() => setProfileOpen(p => !p)}
-            style={{ cursor: "pointer" }}
-            title="Clique para ver detalhes do perfil"
-          >
-            <div className="ks-profile-header">
-              <span className="ks-profile-icon">{hero.icon || "🛡️"}</span>
-              <div>
-                <p className="ks-label">Herói ativo</p>
-                <strong className="ks-title">{hero.name || "Herói"}</strong>
-                <span className="ks-mini-label">{hero.role || "Role"}</span>
+        <div className="ks-hero-layout">
+          <div className="ks-hero-text" style={{ flex: "1 1 640px" }}>
+            <p className="ks-eyebrow">Kingshot Command</p>
+            <h1>Mapa {map} • Fase {stage} • Turno {turn}</h1>
+            <div className="ks-pill-row" style={{ marginTop: 6, marginBottom: 6 }}>
+              <span className={`ks-pill ${status === "won" ? "gold" : status === "over" ? "hp" : "soft"}`}>
+                {gameWon ? "🎉 Vitória" : gameOver ? "☠️ Game Over" : "Em batalha"}
+              </span>
+            </div>
+            <p className="ks-subtitle">
+              Eleve muralhas, treine tropas e mantenha a linha enquanto os invasores avançam.
+            </p>
+            <div className="ks-pill-row" style={{ marginTop: 12, marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+              <span className="ks-pill gold">🪙 Ouro {resources.gold ?? 0}</span>
+              <span className="ks-pill wood">🌲 Madeira {resources.wood ?? 0}</span>
+              <span className="ks-pill energy">⚡ Energia {resources.energy ?? 0}</span>
+              <span className="ks-pill food">🥘 Comida {resources.food ?? 0}</span>
+              <span className="ks-pill hp">❤️ {Math.round(castle.hp)} / {castle.max_hp}</span>
+              <span className="ks-pill soft" title="Streak de vitórias">🔥 Streak {state.achievements?.winStreak ?? 0}</span>
+              <span className="ks-pill stone">🪨 Pedra {resources.stone ?? 0}</span>
+              <span className="ks-pill iron">⛓️ Ferro {resources.iron ?? 0}</span>
+              <span className="ks-pill population">👥 Pop {resources.population ?? 0}</span>
+              <span className="ks-pill gold">XP {hero.xp ?? state.xp ?? 0}</span>
+            </div>
+            <div>
+
+              <div className="ks-inline-actions">
+                <button className={`ks-btn ${state.difficulty === "easy" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("easy")}>Easy</button>
+                <button className={`ks-btn ${state.difficulty === "medium" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("medium")}>Medium</button>
+                <button className={`ks-btn ${state.difficulty === "hard" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("hard")}>Hard</button>
+                <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
+                  {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
+                </button>
+                {state.hero?.beast?.unlocked && (
+                  <button className="ks-btn primary" onClick={runSummonBeast} disabled={!state.hero.beast.ready}>
+                    Invocar fera {state.hero.beast.ready ? "" : "(já usada)"}
+                  </button>
+                )}
+              
+                <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
+                  Feitiço: Meteoro
+                </button>
+                <button className="ks-btn ghost" title="Enfraquece inimigos por 2 turnos" onClick={() => runCastSpell("ice")} disabled={!isActive}>
+                  Feitiço: Gelo
+                </button>
+                <button className="ks-btn ghost" title="Escudo temporário no castelo" onClick={() => runCastSpell("shield")} disabled={!isActive}>
+                  Feitiço: Escudo
+                </button>
+              </div>
+              <div className="ks-inline-actions">
+                <button className="ks-btn ghost" title="Runa de poder: buff em torres" onClick={() => runApplyRune("power")} disabled={!isActive}>
+                  Runa de poder (Lv {state.runes?.power ?? 0})
+                </button>
+                <button className="ks-btn ghost" title="Runa de guarda: defesa extra" onClick={() => runApplyRune("guard")} disabled={!isActive}>
+                  Runa de guarda (Lv {state.runes?.guard ?? 0})
+                </button>
+              
+                <button className="ks-btn ghost" onClick={runCollect} disabled={!isActive}>Coletar recursos</button>
+                <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
+              
               </div>
             </div>
-            {profileOpen && (
-              <>
-                <div className="ks-profile-meta">
-                  <span className="ks-pill soft">Lv {hero.level ?? 1}</span>
-                  <span className="ks-pill gold">XP {hero.xp ?? 0}</span>
-                  <span className="ks-pill soft">Cargas {hero.charges ?? 0}</span>
-                </div>
-                <div className="ks-inline-actions" style={{ marginTop: 8 }}>
-                  <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); setHeroModalOpen(true); }}>Trocar herói</button>
-                  <button className="ks-btn ghost" onClick={(e) => e.stopPropagation()}>Configurações</button>
-                  <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); logout(); }}>Logout</button>
-                </div>
-              </>
-            )}
           </div>
-          <button className="ks-btn primary" onClick={runNextTurn} disabled={!isActive}>
-            {isActive ? "Próximo turno" : "Ação indisponível"}
-          </button>
-          <span className="ks-mini-label">Antecipe ondas e fortaleça as torres. Herói: {hero.charges} cargas • CD {hero.cooldown}</span>
-          <div className="ks-inline-actions">
-            <button className={`ks-btn ${autoMode ? "primary" : "ghost"}`} onClick={toggleAuto}>
-              {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
+          <div className="ks-hero-actions" style={{ minWidth: 220 }}>
+            <div
+              className={`ks-profile-card ${profileOpen ? "open" : ""}`}
+              onClick={() => setProfileOpen(p => !p)}
+              style={{ cursor: "pointer" }}
+              title="Clique para ver detalhes do perfil"
+            >
+              <div className="ks-profile-header">
+                <span className="ks-profile-icon">{hero.icon || "🛡️"}</span>
+                <div>
+                  <p className="ks-label">Herói ativo</p>
+                  <strong className="ks-title">{hero.name || "Herói"}</strong>
+                </div>
+              </div>
+              {profileOpen && (
+                <>
+                  <div className="ks-profile-meta">
+                    <span className="ks-pill soft">Lv {hero.level ?? 1}</span>
+                    <span className="ks-pill gold">XP {hero.xp ?? 0}</span>
+                    <span className="ks-pill soft">Cargas {hero.charges ?? 0}</span>
+                  </div>
+                  <div className="ks-inline-actions" style={{ marginTop: 8 }}>
+                    <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); setHeroModalOpen(true); }}>Trocar herói</button>
+                    <button className="ks-btn ghost" onClick={(e) => e.stopPropagation()}>Configurações</button>
+                    <button className="ks-btn ghost" onClick={(e) => { e.stopPropagation(); logout(); }}>Logout</button>
+                  </div>
+                </>
+              )}
+            </div>
+            <button className="ks-btn primary" onClick={runNextTurn} disabled={!isActive} style={{ width: "100%", marginTop: 12 }}>
+              {isActive ? "Próximo turno" : "Ação indisponível"}
             </button>
-            <span className="ks-mini-label">{autoStatus}</span>
-          </div>
-          <div className="ks-inline-actions">
-            <button className={`ks-btn ${state.difficulty === "easy" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("easy")}>Easy</button>
-            <button className={`ks-btn ${state.difficulty === "medium" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("medium")}>Medium</button>
-            <button className={`ks-btn ${state.difficulty === "hard" ? "primary" : "ghost"}`} onClick={() => changeDifficulty("hard")}>Hard</button>
-          </div>
-          <div className="ks-inline-actions">
+            <button className={`ks-btn ${autoMode ? "primary" : "ghost"}`} onClick={toggleAuto}>
+                  {autoMode ? "Auto turnos: ON" : "Auto turnos: OFF"}
+                </button>
+            <button className="ks-btn ghost" onClick={runNextMap} disabled={!gameWon}>Próximo mapa</button>
             <button className="ks-btn ghost" onClick={() => { const saved = loadSaved(); if (saved) setAutoMode(false); }}>
               Continuar sessão
             </button>
-            <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
-              {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
-            </button>
-            {state.hero?.beast?.unlocked && (
-              <button className="ks-btn primary" onClick={runSummonBeast} disabled={!state.hero.beast.ready}>
-                Invocar fera {state.hero.beast.ready ? "" : "(já usada)"}
-              </button>
-            )}
-          </div>
-          <div className="ks-inline-actions">
-            <button className="ks-btn ghost" title="Meteoro direto no inimigo da frente" onClick={() => runCastSpell("meteor")} disabled={!isActive}>
-              Feitiço: Meteoro
-            </button>
-            <button className="ks-btn ghost" title="Enfraquece inimigos por 2 turnos" onClick={() => runCastSpell("ice")} disabled={!isActive}>
-              Feitiço: Gelo
-            </button>
-            <button className="ks-btn ghost" title="Escudo temporário no castelo" onClick={() => runCastSpell("shield")} disabled={!isActive}>
-              Feitiço: Escudo
-            </button>
-          </div>
-          <div className="ks-inline-actions">
-            <button className="ks-btn ghost" title="Runa de poder: buff em torres" onClick={() => runApplyRune("power")} disabled={!isActive}>
-              Runa de poder (Lv {state.runes?.power ?? 0})
-            </button>
-            <button className="ks-btn ghost" title="Runa de guarda: defesa extra" onClick={() => runApplyRune("guard")} disabled={!isActive}>
-              Runa de guarda (Lv {state.runes?.guard ?? 0})
-            </button>
-          </div>
-          <div className="ks-inline-actions">
-            <button className="ks-btn ghost" onClick={runCollect} disabled={!isActive}>Coletar recursos</button>
-            <button className="ks-btn ghost" onClick={runAddTower} disabled={!isActive}>Construir torre</button>
-            <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
-          </div>
-          <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={runResetGame}>Resetar jogo</button>
-            <button className="ks-btn ghost" onClick={runNextMap} disabled={!gameWon}>Próximo mapa</button>
+
           </div>
         </div>
       </header>
@@ -390,11 +386,6 @@ export default function Game() {
       <div className="ks-grid">
         <section className="ks-panel hud-panel">
           <div className="ks-pill-row">
-            <span className="ks-pill soft">Turno {turn}</span>
-            <span className="ks-pill soft">Fase {stage}</span>
-            <span className="ks-pill soft">Mapa {map}</span>
-            <span className="ks-pill soft">Streak {state.achievements?.winStreak ?? 0}</span>
-            <span className="ks-pill gold">XP {hero.xp ?? state.xp ?? 0}</span>
             <span className="ks-pill gold">Buff: {state.effects?.enemyWeakTurns > 0 ? "Inimigos fracos" : "Nenhum"}</span>
             <span className="ks-pill hp">Debuff: {state.effects?.castleShield ? "Escudo ativo" : "Nenhum"}</span>
             <span className="ks-pill soft">Evento: {state.lastEvent || "Nenhum"}</span>
@@ -500,6 +491,11 @@ export default function Game() {
             <button className="ks-btn primary" onClick={runHealCastle} disabled={!isActive}>
               Curar castelo (energia + comida)
             </button>
+          </div>
+          <div className="ks-inline-actions" style={{ marginTop: 12 }}>
+            <button className="ks-btn ghost" onClick={runAddTower} disabled={!isActive}>Construir torre</button>
+          </div>
+          <div className="ks-inline-actions" style={{ marginTop: 12 }}>
             <button className="ks-btn ghost" onClick={runUpgradeWall} disabled={!isActive}>Reforçar muralha</button>
           </div>
           <div className="ks-inline-actions" style={{ marginTop: 12 }}>
@@ -583,7 +579,6 @@ export default function Game() {
                     <span className="ks-hero-icon">{h.icon}</span>
                     <div>
                       <strong className="ks-title">{h.name}</strong>
-                      <p className="ks-mini-label">{h.role}</p>
                     </div>
                     {hero.key === h.key && <span className="ks-chip success">Ativo</span>}
                   </div>

@@ -102,6 +102,14 @@
 .ks-pill.iron { background: rgba(192, 192, 192, 0.2); border-color: rgba(150, 150, 150, 0.6); }
 .ks-pill.population { background: rgba(170, 130, 90, 0.2); border-color: rgba(130, 90, 50, 0.6); }
 
+.ks-hero-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  flex: 1;
+}
+
 .ks-hero-actions {
   display: flex;
   flex-direction: column;
@@ -484,6 +492,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  padding-top: 1%;
 }
 
 .ks-inline-actions .ks-btn {
