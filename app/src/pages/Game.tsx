@@ -9,6 +9,8 @@ import Builders from "../components/Builders";
 import Barracks from "../components/Barracks";
 import Vault from "../components/Vault";
 import VaultModal from "../components/VaultModal";
+import ArmoryPreview from "../components/ArmoryPreview";
+import ArmoryModal from "../components/ArmoryModal";
 import BattlefieldTroops from "../components/BattlefieldTroops";
 import { login, register } from "../api/gameApi";
 
@@ -20,6 +22,7 @@ export default function Game() {
   const [vaultOpen, setVaultOpen] = useState(false);
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [armoryOpen, setArmoryOpen] = useState(false);
   const [showHelper, setShowHelper] = useState(true);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
@@ -541,11 +544,7 @@ export default function Game() {
               <h2>Catapultas, canhões, cavalaria e armas</h2>
             </div>
           </div>
-          <Barracks
-            armory={armory}
-            onBuild={(type, amount) => runBuildArmory(type, amount)}
-            onUpgrade={runUpgradeArmory}
-          />
+          <ArmoryPreview armory={armory} onOpen={() => setArmoryOpen(true)} />
         </section>
 
       <section className="ks-panel log-panel">
@@ -602,6 +601,14 @@ export default function Game() {
             </div>
           </div>
         </div>
+      )}
+      {armoryOpen && (
+        <ArmoryModal
+          armory={armory}
+          onClose={() => setArmoryOpen(false)}
+          onBuild={(type, amount) => runBuildArmory(type, amount)}
+          onUpgrade={runUpgradeArmory}
+        />
       )}
   </div>
 );
