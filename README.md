@@ -61,6 +61,7 @@ arcade-game/
         ├── hooks/       # useGame.ts tipado
         ├── pages/       # agora em .tsx
         ├── types/       # GameState, Hero, ApiResponse compartilhados
+        ├── tailwind.config.js / postcss.config.js  # TailwindCSS configurado
         ├── App.tsx      # será migrado em breve
         ├── App.css
         └── index.js
@@ -140,6 +141,7 @@ Crie o banco `arcade_game` e configure a conexão no arquivo `.env` do backend.
 - **Scripts de typecheck**: `npm run typecheck` no `api/` e no `app/` para validar tipagem sem build.
 - **Camada de fetch resiliente**: `jsonFetch` em todas as chamadas do front evita crash quando a API estiver offline e retorna mensagem amigável.
 - **Compatibilidade incremental**: componentes de UI seguem com `@ts-nocheck` temporário enquanto tipagem é concluída.
+- **TailwindCSS habilitado**: config em `tailwind.config.js` + `postcss.config.js` com diretivas em `src/index.css` para usar utilitários em toda a UI.
 - **Novos heróis com skills**: Guardião Real (escudo/muralha), Arqueira Élfica (chuva de flechas/crit), Alquimista Arcano (buffs de recursos), Mestre das Feras (fera sempre pronta e dano físico).
 - **Biomas e layouts**: mapas possuem efeitos (lentidão inimiga, buff de torre, obstáculos) e influenciam o fluxo da onda.
 - **Itens raros & fera**: progressão desbloqueia anel, grimório, armadura, relógio e invocação de fera gigante por mapa.
