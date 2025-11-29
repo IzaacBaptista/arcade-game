@@ -1,4 +1,4 @@
-🎮 README.md para o seu projeto — Arcade Game / Kingshot Terminal
+🎮 README.md do projeto — Arcade Game / Kingshot Terminal
 
 <div align="center">
   
