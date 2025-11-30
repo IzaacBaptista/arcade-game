@@ -27,6 +27,8 @@ import {
   nextMap,
   buildArmory,
   upgradeArmory,
+  getShop,
+  buyFromShop,
   clearLog,
 } from "../api/gameApi";
 
@@ -59,6 +61,8 @@ type GameStore = {
   runUseRareItem: (type: string) => Promise<GameApiResult>;
   runSummonBeast: () => Promise<GameApiResult>;
   runSelectHero: (key: string) => Promise<GameApiResult>;
+  runLoadShop: () => Promise<GameApiResult>;
+  runBuyShopItem: (key: string) => Promise<GameApiResult>;
   runBuildArmory: (type: string, amount: number) => Promise<GameApiResult>;
   runUpgradeArmory: (type: string) => Promise<GameApiResult>;
   runResetGame: () => Promise<GameApiResult>;
@@ -139,6 +143,8 @@ const createStore: StateCreator<GameStore> = (set, get) => {
         runUseRareItem: async (type: string) => runWithState(() => consumeRareItem(type)),
         runSummonBeast: async () => runWithState(() => summonBeast()),
         runSelectHero: async (key: string) => runWithState(() => selectHero(key)),
+        runLoadShop: async () => runWithState(() => getShop()),
+        runBuyShopItem: async (key: string) => runWithState(() => buyFromShop(key)),
         runBuildArmory: async (type: string, amount: number) => runWithState(() => buildArmory(type, amount)),
         runUpgradeArmory: async (type: string) => runWithState(() => upgradeArmory(type)),
         runResetGame: async () => runWithState(() => resetGame()),

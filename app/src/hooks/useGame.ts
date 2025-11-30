@@ -19,6 +19,10 @@ import {
   collectTreasure,
   consumePotion,
   useRareItem as consumeRareItem,
+  buyRareItem,
+  buyFromShop,
+  getShop,
+  getAiTips,
   summonBeast,
   selectHero,
   healCastle,
@@ -145,6 +149,24 @@ export function useGame() {
     return collectTreasure().then(d => { updateFrom(d); return d; });
   }
 
+  async function runLoadShop() {
+    const data = await getShop();
+    updateFrom(data);
+    return data;
+  }
+
+  async function runBuyShopItem(key: string) {
+    const data = await buyFromShop(key);
+    updateFrom(data);
+    return data;
+  }
+
+  async function runAiTips() {
+    const data = await getAiTips();
+    // do not persist AI tips into state; just return
+    return data;
+  }
+
   async function runUsePotion(type: string) {
     return consumePotion(type).then(d => { updateFrom(d); return d; });
   }
@@ -216,8 +238,12 @@ export function useGame() {
     runApplyRune,
     runSelectHero,
     runCollectTreasure,
+    runLoadShop,
+    runBuyShopItem,
+    runAiTips,
     runUsePotion,
     runUseRareItem,
+    runBuyRareItem,
     runSummonBeast,
     runBuildArmory,
     runUpgradeArmory,

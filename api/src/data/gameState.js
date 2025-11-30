@@ -83,7 +83,15 @@ const initialState = {
     bookTurns: 0,
     armorTurns: 0,
     hasteTurns: 0,
-    confuseTurns: 1
+    confuseTurns: 1,
+    darknessTurns: 0,
+    trapTurns: 0,
+    poisonTurns: 0,
+    healOverTime: 0,
+    energyRegen: 0,
+    towerBuffTurns: 0,
+    enemySlow: 0,
+    extraResources: 0
   },
 
   achievements: {
@@ -92,6 +100,10 @@ const initialState = {
     totalWins: 0,
     totalLosses: 0,
     daily: { collectGoal: 3, collectProgress: 0, completed: false }
+  },
+
+  shop: {
+    items: []
   },
 
   vault: {

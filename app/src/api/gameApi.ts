@@ -132,6 +132,25 @@ export async function buyRareItem(type: string): Promise<ApiResponse<GameState>>
   });
 }
 
+export async function getShop(): Promise<ApiResponse<GameState>> {
+  return jsonFetch<ApiResponse<GameState>>(`${API_URL}/shop`, { headers: authHeaders() });
+}
+
+export async function buyFromShop(key: string): Promise<ApiResponse<GameState>> {
+  return jsonFetch<ApiResponse<GameState>>(`${API_URL}/shop/buy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ key }),
+  });
+}
+
+export async function getAiTips(): Promise<{ tips?: string[]; msg?: string; state?: GameState }> {
+  return jsonFetch(`${API_URL}/ai/tips`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+  });
+}
+
 export async function summonBeast() {
   return jsonFetch<ApiResponse<GameState>>(`${API_URL}/hero/beast`, { method: "POST", headers: authHeaders() });
 }

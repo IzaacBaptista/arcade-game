@@ -1,5 +1,6 @@
 const GameEngine = require("../services/GameEngine");
 const { getSave, saveState, freshState } = require("../services/saveStore");
+const { generateTips } = require("../services/aiClient");
 
 async function withUserState(req, res, action) {
   const userId = req.userId;
@@ -102,6 +103,31 @@ module.exports = {
   buyRare(req, res) {
     const { type } = req.body;
     return withUserState(req, res, () => GameEngine.buyRareItem(type));
+  },
+
+  async aiTips(req, res) {
+    return withUserState(req, res, async () => {
+      const state = GameEngine.status();
+      const result = await generateTips(state);
+      if (result.error) {
+        return { msg: result.error, tips: [], state };
+      }
+      const tips = (result.content || "")
+        .split("\n")
+        .map(t => t.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+      return { msg: "Dicas geradas.", tips, state };
+    });
+  },
+
+  shop(req, res) {
+    return withUserState(req, res, () => GameEngine.status());
+  },
+
+  shopBuy(req, res) {
+    const { key } = req.body || {};
+    return withUserState(req, res, () => GameEngine.buyShopItem(key));
   },
 
   summonBeast(req, res) {

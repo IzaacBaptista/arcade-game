@@ -14,9 +14,135 @@ import VaultModal from "../components/VaultModal";
 import ArmoryPreview from "../components/ArmoryPreview";
 import ArmoryModal from "../components/ArmoryModal";
 import BattlefieldTroops from "../components/BattlefieldTroops";
+import HeroCardFull from "../components/HeroCardFull";
 import { login, register } from "../api/gameApi";
 
 import { useGame } from "../hooks/useGame";
+
+const heroIconThemes = {
+  aurora: {
+    background: "linear-gradient(135deg, #fff6d5, #ffd69d)",
+    shadow: "0 12px 30px rgba(245, 158, 11, 0.36)",
+    svg: (
+      <svg viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="16" fill="url(#aurora-core)" stroke="#f59e0b" strokeWidth="3" />
+        <path d="M32 10v8" stroke="#d97706" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 46v8" stroke="#d97706" strokeWidth="3" strokeLinecap="round" />
+        <path d="M10 32h8" stroke="#d97706" strokeWidth="3" strokeLinecap="round" />
+        <path d="M46 32h8" stroke="#d97706" strokeWidth="3" strokeLinecap="round" />
+        <path d="m17 17 6 6" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
+        <path d="m41 41 6 6" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
+        <path d="m17 47 6-6" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
+        <path d="m41 23 6-6" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" />
+        <defs>
+          <linearGradient id="aurora-core" x1="18" y1="18" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#fff7d6" />
+            <stop offset="1" stopColor="#fcd34d" />
+          </linearGradient>
+        </defs>
+      </svg>
+    )
+  },
+  boros: {
+    background: "linear-gradient(135deg, #e5ecf8, #c8d6f1)",
+    shadow: "0 12px 30px rgba(59, 130, 246, 0.28)",
+    svg: (
+      <svg viewBox="0 0 64 64" fill="none">
+        <path
+          d="M32 10 16 16v14c0 10.5 7 19.8 16 23.2 9-3.4 16-12.7 16-23.2V16L32 10Z"
+          fill="url(#boros-shield)"
+          stroke="#1d4ed8"
+          strokeWidth="3"
+        />
+        <path d="M26 32h12" stroke="#1e3a8a" strokeWidth="3" strokeLinecap="round" />
+        <path d="M32 22v20" stroke="#1e3a8a" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="32" cy="32" r="4" fill="#dbeafe" stroke="#1d4ed8" strokeWidth="2" />
+        <defs>
+          <linearGradient id="boros-shield" x1="16" y1="16" x2="48" y2="54" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#e2e8f0" />
+            <stop offset="1" stopColor="#bfdbfe" />
+          </linearGradient>
+        </defs>
+      </svg>
+    )
+  },
+  kael: {
+    background: "linear-gradient(135deg, #ffe6d5, #ffb199)",
+    shadow: "0 12px 30px rgba(249, 115, 22, 0.35)",
+    svg: (
+      <svg viewBox="0 0 64 64" fill="none">
+        <path
+          d="M32 10c6 10 6 14 0 22-6 8-2 14 0 18"
+          stroke="#ea580c"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M34 14c4 6 4 10 0 16"
+          stroke="#fb923c"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M22 34c4 2 10 2 14 0"
+          stroke="#c2410c"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 44c2 2 6 4 8 4s6-2 8-4c-1 6-5 10-8 10s-7-4-8-10Z"
+          fill="url(#kael-fire)"
+        />
+        <defs>
+          <linearGradient id="kael-fire" x1="24" y1="34" x2="48" y2="54" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#f97316" />
+            <stop offset="1" stopColor="#fb923c" />
+          </linearGradient>
+        </defs>
+      </svg>
+    )
+  },
+  lyra: {
+    background: "linear-gradient(135deg, #e0f2ff, #c0e7ff)",
+    shadow: "0 12px 30px rgba(59, 130, 246, 0.25)",
+    svg: (
+      <svg viewBox="0 0 64 64" fill="none">
+        <path
+          d="M32 12v12m0 16v12M18 20l10 10M36 34l10 10M46 20 36 30M28 34l-10 10"
+          stroke="#0ea5e9"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <circle cx="32" cy="32" r="12" fill="url(#lyra-snow)" />
+        <circle cx="32" cy="32" r="4" fill="#e0f2fe" stroke="#0ea5e9" strokeWidth="2" />
+        <defs>
+          <linearGradient id="lyra-snow" x1="20" y1="20" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#f0f9ff" />
+            <stop offset="1" stopColor="#bae6fd" />
+          </linearGradient>
+        </defs>
+      </svg>
+    )
+  }
+};
+
+function HeroIcon({ heroKey, fallback, size = 48, className = "" }) {
+  const theme = heroIconThemes[heroKey] || {};
+  const style = {
+    width: size,
+    height: size,
+    background: theme.background || "linear-gradient(135deg, #f5f5f5, #ffffff)",
+    boxShadow: theme.shadow || "0 8px 18px rgba(0,0,0,0.08)",
+  };
+
+  return (
+    <div className={`ks-hero-icon ${className}`.trim()} style={style}>
+      {theme.svg ? theme.svg : <span style={{ fontSize: size * 0.55 }}>{fallback || "🛡️"}</span>}
+    </div>
+  );
+}
 
 export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
@@ -29,6 +155,10 @@ export default function Game() {
   const [armoryOpen, setArmoryOpen] = useState(false);
   const [troopsOpen, setTroopsOpen] = useState(false);
   const [showHelper, setShowHelper] = useState(true);
+  const [shopOpen, setShopOpen] = useState(false);
+  const [aiTips, setAiTips] = useState<string[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const [authForm, setAuthForm] = useState({ email: "", password: "", mode: "login", message: "" });
   const autoTimer = useRef(null);
   
@@ -64,6 +194,9 @@ export default function Game() {
     loadSaved,
     loadStatus,
     runClearLog,
+    runLoadShop,
+    runBuyShopItem,
+    runAiTips,
   } = useGame();
 
   useEffect(() => {
@@ -180,6 +313,7 @@ export default function Game() {
     hero = { name: "Herói", charges: 0, cooldown: 0 },
     heroRoster = [],
     vault = { jewels: 0, potions: {} },
+    shop = { items: [] },
   } = state || {};
 
   const gameOver = status === "over";
@@ -232,6 +366,8 @@ export default function Game() {
     if (eff.bookTurns > 0) rare.push({ label: "Grimório ativo", turns: eff.bookTurns, icon: "📜" });
     if (eff.armorTurns > 0) rare.push({ label: "Armadura ativa", turns: eff.armorTurns, icon: "🛡️" });
     if (eff.hasteTurns > 0) rare.push({ label: "Relógio ativo", turns: eff.hasteTurns, icon: "⏳" });
+    if (eff.darknessTurns > 0) rare.push({ label: "Poção da noite", turns: eff.darknessTurns, icon: "🌑" });
+    if (eff.trapTurns > 0) rare.push({ label: "Armadilha venenosa", turns: eff.trapTurns, icon: "☠️" });
     if (state.hero?.beast?.activeTurns > 0) {
       rare.push({ label: "Fera ativa", turns: state.hero.beast.activeTurns, icon: "🐉" });
     }
@@ -306,6 +442,22 @@ export default function Game() {
                 <button className="ks-btn ghost" onClick={() => setShowHelper(!showHelper)}>
                   {showHelper ? "Esconder ajuda" : "Mostrar ajuda"}
                 </button>
+                <button className="ks-btn ghost" onClick={() => { setShopOpen(true); runLoadShop(); }}>
+                  Shop 🛒
+                </button>
+                <button
+                  className="ks-btn ghost"
+                  onClick={async () => {
+                    setAiError(null);
+                    setAiLoading(true);
+                    const res = await runAiTips();
+                    setAiLoading(false);
+                    if (res?.msg && res.msg.toLowerCase().includes("openai")) setAiError(res.msg);
+                    if (Array.isArray(res?.tips)) setAiTips(res.tips);
+                  }}
+                >
+                  {aiLoading ? "Gerando dica IA..." : "Dica IA"}
+                </button>
                 {state.hero?.beast?.unlocked && (
                   <button className="ks-btn primary" onClick={runSummonBeast} disabled={!state.hero.beast.ready}>
                     Invocar fera {state.hero.beast.ready ? "" : "(já usada)"}
@@ -344,7 +496,7 @@ export default function Game() {
               title="Clique para ver detalhes do perfil"
             >
               <div className="ks-profile-header">
-                <span className="ks-profile-icon">{hero.icon || "🛡️"}</span>
+                <HeroIcon heroKey={hero.key} fallback={hero.icon} size={42} />
                 <div>
                   <p className="ks-label">Herói ativo</p>
                   <strong className="ks-title">{hero.name || "Herói"}</strong>
@@ -426,6 +578,31 @@ export default function Game() {
               {helperTips.map((tip, idx) => (
                 <div key={idx} className="ks-helper-item">{tip}</div>
               ))}
+              <div className="ks-helper-ai">
+                <div className="ks-inline-actions" style={{ marginTop: 8 }}>
+                  <button
+                    className="ks-btn ghost"
+                    onClick={async () => {
+                      setAiError(null);
+                      setAiLoading(true);
+                      const res = await runAiTips();
+                      setAiLoading(false);
+                      if (res?.msg && res.msg.toLowerCase().includes("openai")) setAiError(res.msg);
+                      if (Array.isArray(res?.tips)) setAiTips(res.tips);
+                    }}
+                  >
+                    {aiLoading ? "Gerando dica IA..." : "Gerar dica com IA"}
+                  </button>
+                  {aiError && <span className="ks-mini-label danger">{aiError}</span>}
+                </div>
+                {aiTips.length > 0 && (
+                  <div className="ks-helper-list">
+                    {aiTips.map((tip, idx) => (
+                      <div key={idx} className="ks-helper-item">{tip}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {effectsActive.length > 0 && (
@@ -589,6 +766,55 @@ export default function Game() {
           onBuyRare={runBuyRareItem}
         />
       )}
+      {shopOpen && (
+        <div className="ks-modal-backdrop" onClick={() => setShopOpen(false)}>
+          <div className="ks-modal" onClick={e => e.stopPropagation()}>
+            <div className="ks-modal-header">
+              <div>
+                <h3>Loja do Reino</h3>
+                <p className="ks-mini-label">Moedas raras: {resources.coins ?? 0} • Ouro: {resources.gold ?? 0}</p>
+              </div>
+              <button className="ks-btn ghost" onClick={() => setShopOpen(false)}>Fechar</button>
+            </div>
+            <div className="ks-hero-grid">
+              {(shop.items || []).map(item => {
+                const costCoins = item.cost?.coins || 0;
+                const costGold = item.cost?.gold || 0;
+                const affordable = (resources.coins ?? 0) >= costCoins && (resources.gold ?? 0) >= costGold;
+                const icon =
+                  item.type === "potion" ? "🧪" :
+                  item.type === "bundle" ? "🎁" :
+                  item.type === "builder" ? "🛠️" :
+                  item.type === "power_dark" ? "🌑" :
+                  item.type === "power_trap" ? "☠️" :
+                  "✨";
+                return (
+                  <div key={item.key} className="ks-hero-card">
+                    <div className="ks-hero-card-head">
+                      <div className="ks-shop-icon">{icon}</div>
+                      <div>
+                        <strong className="ks-title">{item.name}</strong>
+                        <p className="ks-mini-label">{item.desc}</p>
+                      </div>
+                    </div>
+                    <div className="ks-hero-card-body">
+                      <span className="ks-pill soft">🪙 {costCoins} moedas</span>
+                      <span className="ks-pill gold">🪙 {costGold} ouro</span>
+                    </div>
+                    <button
+                      className="ks-btn primary"
+                      disabled={item.owned || !affordable}
+                      onClick={() => runBuyShopItem(item.key)}
+                    >
+                      {item.owned ? "Já possui" : affordable ? "Comprar" : "Saldo insuficiente"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
       {heroModalOpen && (
         <div className="ks-modal-backdrop" onClick={() => setHeroModalOpen(false)}>
           <div className="ks-modal" onClick={e => e.stopPropagation()}>
@@ -598,27 +824,12 @@ export default function Game() {
             </div>
             <div className="ks-hero-grid">
               {(heroRoster || []).map(h => (
-                <div key={h.key} className={`ks-hero-card ${hero.key === h.key ? "active" : ""}`}>
-                  <div className="ks-hero-card-head">
-                    <span className="ks-hero-icon">{h.icon}</span>
-                    <div>
-                      <strong className="ks-title">{h.name}</strong>
-                    </div>
-                    {hero.key === h.key && <span className="ks-chip success">Ativo</span>}
-                  </div>
-                  <div className="ks-hero-card-body">
-                    <span className="ks-pill soft">Lv {h.level ?? 1}</span>
-                    <span className="ks-pill gold">XP {h.xp ?? 0}</span>
-                    <span className="ks-mini-label">Cargas {h.charges ?? 0}</span>
-                  </div>
-                  <button
-                    className="ks-btn primary"
-                    disabled={hero.key === h.key}
-                    onClick={() => { runSelectHero(h.key); setHeroModalOpen(false); }}
-                  >
-                    {hero.key === h.key ? "Selecionado" : "Ativar"}
-                  </button>
-                </div>
+                <HeroCardFull
+                  key={h.key}
+                  hero={h}
+                  isActive={hero.key === h.key}
+                  onSelect={(key) => { runSelectHero(key); setHeroModalOpen(false); }}
+                />
               ))}
             </div>
           </div>

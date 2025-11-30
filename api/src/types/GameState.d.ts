@@ -47,6 +47,17 @@ export interface HeroSummary {
   charges?: number;
 }
 
+export interface ShopItem {
+  key: string;
+  name: string;
+  desc: string;
+  cost: { coins?: number; gold?: number };
+  type: string;
+  payload?: any;
+  owned?: boolean;
+  affordable?: boolean;
+}
+
 export interface GameState {
   map: number;
   maxStage: number;
@@ -61,4 +72,5 @@ export interface GameState {
   hero: HeroSummary & { beast?: { unlocked?: boolean; ready?: boolean; activeTurns?: number } };
   resources: Record<string, number>;
   castle: { hp: number; max_hp: number; wall_level: number; defense_bonus: number };
+  shop?: { items: ShopItem[] };
 }

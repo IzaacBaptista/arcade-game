@@ -2,6 +2,89 @@
 const { randomUUID } = require("crypto");
 const { gameState, initialState } = require("../data/gameState");
 
+const shopCatalog = [
+  {
+    key: "potion_heal",
+    name: "Poção de Cura",
+    desc: "+1 poção de cura (castelo +180 HP)",
+    cost: { coins: 1, gold: 40 },
+    type: "potion",
+    payload: "heal"
+  },
+  {
+    key: "potion_energy",
+    name: "Poção de Energia",
+    desc: "+1 poção de energia (+80 energia)",
+    cost: { coins: 1, gold: 30 },
+    type: "potion",
+    payload: "energy"
+  },
+  {
+    key: "resource_crate",
+    name: "Baú de Recursos",
+    desc: "+150 ouro, +100 madeira, +80 energia",
+    cost: { coins: 0, gold: 120 },
+    type: "bundle",
+    payload: { gold: 150, wood: 100, energy: 80 }
+  },
+  {
+    key: "unlock_rare",
+    name: "Pergaminho Raro",
+    desc: "Desbloqueia todos os itens raros",
+    cost: { coins: 8, gold: 0 },
+    type: "unlock_rare"
+  },
+  {
+    key: "hire_builder",
+    name: "Contratar Construtor",
+    desc: "+1 construtor permanente",
+    cost: { coins: 4, gold: 60 },
+    type: "builder"
+  },
+  {
+    key: "power_darkness",
+    name: "Poção da Noite",
+    desc: "Inimigos ficam cegos por 3 turnos (erros e -40% atk).",
+    cost: { coins: 5, gold: 40 },
+    type: "power_dark"
+  },
+  {
+    key: "power_trap",
+    name: "Armadilha Venenosa",
+    desc: "Campo minado por 3 turnos: dano veneno contínuo.",
+    cost: { coins: 6, gold: 50 },
+    type: "power_trap"
+  },
+  {
+    key: "power_tower_buff",
+    name: "Bênção da Torre",
+    desc: "Torres recebem +20% de ataque por 3 turnos.",
+    cost: { coins: 7, gold: 70 },
+    type: "power_tower_buff"
+  },
+  {
+    key: "power_extra_resources",
+    name: "Amuleto da Abundância",
+    desc: "Coleta +50% recursos por 3 turnos.",
+    cost: { coins: 7, gold: 70 },
+    type: "power_extra_resources"
+  },
+  {
+    key: "power_enemy_slow",
+    name: "Amuleto da Lentidão",
+    desc: "Inimigos têm -40% de velocidade por 3 turnos.",
+    cost: { coins: 7, gold: 70 },
+    type: "power_enemy_slow"
+  },
+  {
+    key: "power_heal_over_time",
+    name: "Poção de Cura Contínua",
+    desc: "Cura o castelo por 50 HP a cada turno por 3 turnos.",
+    cost: { coins: 6, gold: 60 },
+    type: "power_heal_over_time"
+  }
+];
+
 function shortageMessage(required) {
   const res = gameState.resources;
   const missing = [];
@@ -87,6 +170,7 @@ class GameEngine {
 
   status() {
     this.ensureUnlocks();
+    this.refreshShop();
     return gameState;
   }
 
@@ -106,6 +190,7 @@ class GameEngine {
     if (!gameState.vault.rare) gameState.vault.rare = JSON.parse(JSON.stringify(initialState.vault.rare));
     if (!gameState.hero) gameState.hero = JSON.parse(JSON.stringify(initialState.hero));
     if (!gameState.heroRoster) gameState.heroRoster = JSON.parse(JSON.stringify(initialState.heroRoster));
+    if (!gameState.shop) gameState.shop = { items: [] };
     if (!gameState.path || !gameState.path.length) gameState.path = this.buildDefaultPath();
     if (Array.isArray(gameState.enemies)) {
       gameState.enemies = gameState.enemies.map(e => ({
@@ -134,9 +219,35 @@ class GameEngine {
     }
   }
 
+  refreshShop() {
+    const coins = gameState.resources?.coins || 0;
+    const gold = gameState.resources?.gold || 0;
+    const rare = gameState.vault?.rare || [];
+    const allRareUnlocked = rare.every(r => r.unlocked);
+    gameState.shop = {
+      items: shopCatalog.map(item => ({
+        ...item,
+        owned: item.type === "unlock_rare" ? allRareUnlocked : false,
+        affordable: (item.cost.coins || 0) <= coins && (item.cost.gold || 0) <= gold
+      }))
+    };
+  }
+
   gainXp(amount = 0) {
     const inc = Math.max(0, amount);
-    gameState.xp = (gameState.xp || 0) + inc;
+    const previousXp = gameState.xp || 0;
+    gameState.xp = previousXp + inc;
+    // Award 1 rare coin per 1000 XP milestones reached
+    const beforeCoins = Math.floor(previousXp / 1000);
+    const afterCoins = Math.floor(gameState.xp / 1000);
+    const coinGain = afterCoins - beforeCoins;
+    if (coinGain > 0) {
+      gameState.resources.coins = (gameState.resources.coins || 0) + coinGain;
+      gameState.log = [
+        `Recompensa de XP: +${coinGain} moeda rara (total ${gameState.resources.coins}).`,
+        ...(gameState.log || [])
+      ].slice(0, 10);
+    }
     const heroKey = gameState.hero?.key;
     if (heroKey && Array.isArray(gameState.heroRoster)) {
       const h = gameState.heroRoster.find(hr => hr.key === heroKey);
@@ -871,6 +982,73 @@ class GameEngine {
     return { msg: "Item comprado.", state: this.status() };
   }
 
+  shopItems() {
+    this.refreshShop();
+    return gameState.shop?.items || [];
+  }
+
+  buyShopItem(key) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    const item = shopCatalog.find(i => i.key === key);
+    if (!item) return { msg: "Item da loja não encontrado.", state: this.status() };
+
+    const costCoins = item.cost.coins || 0;
+    const costGold = item.cost.gold || 0;
+    if ((gameState.resources.coins || 0) < costCoins || (gameState.resources.gold || 0) < costGold) {
+      return { msg: "Saldo insuficiente para comprar.", state: this.status() };
+    }
+
+    // apply cost
+    gameState.resources.coins = (gameState.resources.coins || 0) - costCoins;
+    gameState.resources.gold = (gameState.resources.gold || 0) - costGold;
+
+    if (item.type === "potion") {
+      const potions = gameState.vault.potions || {};
+      potions[item.payload] = (potions[item.payload] || 0) + 1;
+      gameState.vault.potions = potions;
+      log.push(`Comprou ${item.name}: +1 poção de ${item.payload}.`);
+    } else if (item.type === "bundle") {
+      const bundle = item.payload || {};
+      Object.keys(bundle).forEach(k => {
+        gameState.resources[k] = (gameState.resources[k] || 0) + (bundle[k] || 0);
+      });
+      log.push(`Comprou ${item.name}: +${bundle.gold || 0} ouro, +${bundle.wood || 0} madeira, +${bundle.energy || 0} energia.`);
+    } else if (item.type === "unlock_rare") {
+      const rare = gameState.vault.rare || [];
+      rare.forEach(r => { r.unlocked = true; });
+      gameState.vault.rare = rare;
+      log.push("Todos os itens raros foram desbloqueados!");
+    } else if (item.type === "builder") {
+      gameState.builders.qty = (gameState.builders.qty || 0) + 1;
+      log.push("Contratou 1 construtor extra.");
+    } else if (item.type === "power_dark") {
+      gameState.effects.darknessTurns = Math.max(gameState.effects.darknessTurns || 0, 3);
+      log.push("Poção da Noite ativada: inimigos com dificuldade para acertar por 3 turnos.");
+    } else if (item.type === "power_trap") {
+      gameState.effects.trapTurns = Math.max(gameState.effects.trapTurns || 0, 3);
+      log.push("Armadilhas venenosas espalhadas no campo por 3 turnos.");
+    } else if (item.type === "power_tower_buff") {
+      gameState.effects.towerBuffTurns = Math.max(gameState.effects.towerBuffTurns || 0, 3);
+      log.push("Torres fortalecidas por 3 turnos.");
+    } else if (item.type === "power_extra_resources") {
+      const extraGold = 100 + gameState.map * 20;
+      const extraWood = 80 + gameState.map * 15;
+      const extraEnergy = 50 + gameState.map * 10;
+      const extraFood = 60 + gameState.map * 12;
+
+      gameState.resources.gold += extraGold;
+      gameState.resources.wood += extraWood;
+      gameState.resources.energy += extraEnergy;
+      gameState.resources.food += extraFood;
+      log.push(`Bônus de recursos: +${extraGold} ouro, +${extraWood} madeira, +${extraEnergy} energia, +${extraFood} comida.`);
+    }
+
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    this.refreshShop();
+    return { msg: "Compra realizada.", state: this.status() };
+  }
+
   summonBeast() {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
@@ -966,10 +1144,33 @@ class GameEngine {
       if (gameState.effects[k] && gameState.effects[k] > 0) gameState.effects[k] -= 1;
     });
     if (gameState.effects.confuseTurns > 0) gameState.effects.confuseTurns -= 1;
+    if (gameState.effects.darknessTurns > 0) gameState.effects.darknessTurns -= 1;
+    if (gameState.effects.trapTurns > 0) gameState.effects.trapTurns -= 1;
+    if (gameState.effects.towerBuffTurns > 0) gameState.effects.towerBuffTurns -= 1;
+
     rare.forEach(r => { if (r.activeTurns && r.activeTurns > 0) r.activeTurns -= 1; });
 
     if (gameState.hero && gameState.hero.cooldown > 0) {
       gameState.hero.cooldown -= 1;
+    }
+
+    // Armadilha venenosa ativa
+    if (gameState.effects.trapTurns > 0 && Array.isArray(gameState.enemies) && gameState.enemies.length) {
+      const trapDamage = 6 + Math.round(gameState.stage * 0.8);
+      const trapLog = [];
+      gameState.enemies = gameState.enemies
+        .map(e => {
+          const hp = e.hp - trapDamage;
+          if (hp <= 0) {
+            trapLog.push(`${e.name} sucumbiu à armadilha venenosa!`);
+            this.grantEnemyRewards(e, trapLog);
+            return null;
+          }
+          return { ...e, hp };
+        })
+        .filter(Boolean);
+      trapLog.unshift(`Armadilhas venenosas causaram ${trapDamage} de dano em todos os inimigos.`);
+      gameState.log = [...trapLog, ...(gameState.log || [])].slice(0, 10);
     }
 
     let eventBuff = { towerAtk: 1, castleDef: 0, troopAtk: 1 };
@@ -1130,6 +1331,13 @@ class GameEngine {
             }
             continue;
           }
+        }
+      }
+      if (gameState.effects.darknessTurns > 0) {
+        enemyAttack = Math.round(enemyAttack * 0.6);
+        if (Math.random() < 0.25) {
+          log.push(`${enemy.name} errou o ataque na escuridão!`);
+          continue;
         }
       }
       if (enemy.boss) enemyAttack *= 1.1;
