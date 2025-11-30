@@ -17,6 +17,7 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
   const artifacts = vault.artifacts || [];
   const potions = vault.potions || {};
   const rare = vault.rare || [];
+  const coins = vault.coins ?? 0;
 
   return (
     <div className="ks-modal-backdrop" onClick={onClose}>
@@ -25,6 +26,7 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
           <div>
             <p className="ks-eyebrow">Baú do reino</p>
             <h2>{vault.jewels} joias</h2>
+            <span className="ks-mini-label">Moedas raras: {coins}</span>
           </div>
           <div className="ks-inline-actions">
             <button className="ks-btn ghost" onClick={onCollect}>Coletar tesouro</button>
@@ -82,6 +84,7 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
                   <div>
                     <p className="ks-label">{item.label || r.label}</p>
                     <strong className="ks-title">{item.unlocked ? "Desbloqueado" : "Bloqueado"}</strong>
+                    {!item.unlocked && item.cost && <span className="ks-mini-label">Custo: {item.cost} 🪙</span>}
                   </div>
                 </div>
                 <p className="ks-subtitle">{item.desc || "Item raro"}</p>
@@ -93,10 +96,10 @@ export default function VaultModal({ vault, onClose, onCollect, onUsePotion, onU
                 <div className="ks-card-actions">
                   <button
                     className="ks-btn ghost"
-                    onClick={() => onUseRare(r.key)}
-                    disabled={!item.unlocked}
+                    onClick={() => (item.unlocked ? onUseRare(r.key) : onBuyRare(r.key))}
+                    disabled={!item.unlocked && ((item.cost || 0) > coins)}
                   >
-                    Ativar
+                    {item.unlocked ? "Ativar" : `Comprar (${item.cost || "?"} 🪙)`}
                   </button>
                 </div>
               </div>

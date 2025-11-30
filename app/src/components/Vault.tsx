@@ -2,6 +2,7 @@
 export default function Vault({ vault, onCollect, onUsePotion, onUseRare, onOpen }) {
   const artifacts = vault.artifacts || [];
   const potions = vault.potions || {};
+  const coins = vault.coins ?? vault?.resources?.coins ?? 0;
   
   // Conta total de poções
   const totalPotions = Object.values(potions).reduce((sum, qty) => sum + (qty || 0), 0);
@@ -32,6 +33,7 @@ export default function Vault({ vault, onCollect, onUsePotion, onUseRare, onOpen
       </div>
 
       <div className="ks-row" style={{ marginTop: 6, flexWrap: "wrap", gap: 6 }}>
+        <span className="ks-pill soft">🪙 {coins} moedas raras</span>
         <span className="ks-pill soft">🧪 {totalPotions} poções</span>
         <span className="ks-pill soft">📦 {artifacts.length} artefatos</span>
       </div>

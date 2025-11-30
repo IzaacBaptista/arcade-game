@@ -787,13 +787,15 @@ class GameEngine {
     const gainJewels = 10 + gameState.map * 3;
     const gainGold = 25 + gameState.stage * 5;
     const gainWood = 15 + gameState.stage * 3;
+    const gainCoins = 1 + Math.floor(gameState.map / 2);
 
     gameState.vault.jewels += gainJewels;
+    gameState.resources.coins = (gameState.resources.coins || 0) + gainCoins;
     gameState.resources.gold += gainGold;
     gameState.resources.wood += gainWood;
     this.gainXp(10);
 
-    log.push(`Baú: +${gainJewels} joias, +${gainGold} ouro, +${gainWood} madeira.`);
+    log.push(`Baú: +${gainJewels} joias, +${gainCoins} moedas raras, +${gainGold} ouro, +${gainWood} madeira.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
     return { msg: "Tesouro coletado.", state: this.status() };
   }
@@ -847,6 +849,26 @@ class GameEngine {
     log.push(`${item.label} ativado!`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
     return { msg: "Item ativado.", state: this.status() };
+  }
+
+  buyRareItem(type) {
+    const log = [];
+    if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
+    const rare = gameState.vault.rare || [];
+    const item = rare.find(r => r.key === type);
+    if (!item) return { msg: "Item não encontrado.", state: this.status() };
+    if (item.unlocked) return { msg: "Item já desbloqueado.", state: this.status() };
+
+    const cost = item.cost || 10;
+    if ((gameState.resources.coins || 0) < cost) {
+      return { msg: `Moedas raras insuficientes (${gameState.resources.coins || 0}/${cost}).`, state: this.status() };
+    }
+
+    gameState.resources.coins -= cost;
+    item.unlocked = true;
+    log.push(`${item.label} comprado por ${cost} moedas raras.`);
+    gameState.log = [...log, ...gameState.log].slice(0, 10);
+    return { msg: "Item comprado.", state: this.status() };
   }
 
   summonBeast() {

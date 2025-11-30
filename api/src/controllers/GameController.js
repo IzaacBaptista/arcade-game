@@ -99,6 +99,11 @@ module.exports = {
     return withUserState(req, res, () => GameEngine.useRareItem(type));
   },
 
+  buyRare(req, res) {
+    const { type } = req.body;
+    return withUserState(req, res, () => GameEngine.buyRareItem(type));
+  },
+
   summonBeast(req, res) {
     return withUserState(req, res, () => GameEngine.summonBeast());
   },

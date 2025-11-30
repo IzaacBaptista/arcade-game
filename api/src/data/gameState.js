@@ -22,7 +22,8 @@ const initialState = {
     food: 100,
     stone: 100,
     iron: 100,
-    population: 5
+    population: 5,
+    coins: 10
   },
 
   xp: 0,
@@ -98,10 +99,10 @@ const initialState = {
     artifacts: [],
     potions: { heal: 2, energy: 2, loot: 1, confuse: 1 },
     rare: [
-      { key: "ring", label: "Anel de Poder", icon: "💍", desc: "+20% atk torres por 3 turnos", unlocked: false, activeTurns: 0 },
-      { key: "book", label: "Grimório", icon: "📜", desc: "+15% atk tropas por 3 turnos", unlocked: false, activeTurns: 0 },
-      { key: "armor", label: "Armadura Sagrada", icon: "🛡️", desc: "+10 DEF castelo por 3 turnos", unlocked: false, activeTurns: 0 },
-      { key: "haste", label: "Relógio Arcano", icon: "⏳", desc: "-15% dano inimigo por 2 turnos", unlocked: false, activeTurns: 0 }
+      { key: "ring", label: "Anel de Poder", icon: "💍", desc: "+20% atk torres por 3 turnos", unlocked: false, activeTurns: 0, cost: 10 },
+      { key: "book", label: "Grimório", icon: "📜", desc: "+15% atk tropas por 3 turnos", unlocked: false, activeTurns: 0, cost: 10 },
+      { key: "armor", label: "Armadura Sagrada", icon: "🛡️", desc: "+10 DEF castelo por 3 turnos", unlocked: false, activeTurns: 0, cost: 12 },
+      { key: "haste", label: "Relógio Arcano", icon: "⏳", desc: "-15% dano inimigo por 2 turnos", unlocked: false, activeTurns: 0, cost: 12 }
     ]
   },
 

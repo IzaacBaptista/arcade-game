@@ -56,6 +56,7 @@ export default function Game() {
     runCollectTreasure,
     runUsePotion,
     runUseRareItem,
+    runBuyRareItem,
     runBuildArmory,
     runUpgradeArmory,
     runResetGame,
@@ -585,6 +586,7 @@ export default function Game() {
           onCollect={runCollectTreasure}
           onUsePotion={runUsePotion}
           onUseRare={runUseRareItem}
+          onBuyRare={runBuyRareItem}
         />
       )}
       {heroModalOpen && (

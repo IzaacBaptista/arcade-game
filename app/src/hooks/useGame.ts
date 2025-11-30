@@ -153,6 +153,12 @@ export function useGame() {
     return consumeRareItem(type).then(d => { updateFrom(d); return d; });
   }
 
+  async function runBuyRareItem(type: string) {
+    const data = await buyRareItem(type);
+    updateFrom(data);
+    return data;
+  }
+
   async function runSummonBeast() {
     const data = await summonBeast();
     updateFrom(data);

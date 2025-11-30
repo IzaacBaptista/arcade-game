@@ -124,6 +124,14 @@ export async function useRareItem(type: string): Promise<ApiResponse<GameState>>
   });
 }
 
+export async function buyRareItem(type: string): Promise<ApiResponse<GameState>> {
+  return jsonFetch<ApiResponse<GameState>>(`${API_URL}/vault/rare/buy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ type }),
+  });
+}
+
 export async function summonBeast() {
   return jsonFetch<ApiResponse<GameState>>(`${API_URL}/hero/beast`, { method: "POST", headers: authHeaders() });
 }
