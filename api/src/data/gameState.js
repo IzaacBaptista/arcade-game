@@ -17,12 +17,12 @@ const initialState = {
 
   resources: {
     gold: 100,
-    wood: 50,
-    energy: 30,
-    food: 70,
-    stone: 40,
-    iron: 20,
-    population: 20
+    wood: 100,
+    energy: 100,
+    food: 100,
+    stone: 100,
+    iron: 100,
+    population: 5
   },
 
   xp: 0,
@@ -31,6 +31,13 @@ const initialState = {
     qty: 3,
     efficiency: 1,
     workers: []
+  },
+  civilians: {
+    builder: { qty: 3, level: 1 },
+    farmer: { qty: 2, level: 1 },
+    blacksmith: { qty: 2, level: 1 },
+    engineer: { qty: 2, level: 1 },
+    transporter: { qty: 3, level: 1 }
   },
 
   runes: {

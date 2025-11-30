@@ -64,11 +64,11 @@ export async function collectBuilders(): Promise<ApiResponse<GameState>> {
   return jsonFetch<ApiResponse<GameState>>(`${API_URL}/builders/collect`, { method: "POST", headers: authHeaders() });
 }
 
-export async function hireBuilders(amount = 1): Promise<ApiResponse<GameState>> {
+export async function hireBuilders(type: string = "builder", amount = 1): Promise<ApiResponse<GameState>> {
   return jsonFetch<ApiResponse<GameState>>(`${API_URL}/builders/hire`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({ type, amount }),
   });
 }
 

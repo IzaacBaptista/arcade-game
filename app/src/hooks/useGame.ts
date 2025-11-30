@@ -114,8 +114,8 @@ export function useGame() {
     updateFrom(data);
   }
 
-  async function runHireBuilders(amount: number = 1) {
-    const data = await hireBuilders(amount);
+  async function runHireBuilders(type: string = "builder", amount: number = 1) {
+    const data = await hireBuilders(type, amount);
     updateFrom(data);
   }
 

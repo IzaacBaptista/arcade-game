@@ -57,8 +57,8 @@ module.exports = {
   },
 
   hireBuilders(req, res) {
-    const { amount = 1 } = req.body || {};
-    return withUserState(req, res, () => GameEngine.hireBuilders(Number(amount) || 1));
+    const { amount = 1, type = "builder" } = req.body || {};
+    return withUserState(req, res, () => GameEngine.hireBuilders(type, Number(amount) || 1));
   },
 
   heal(req, res) {

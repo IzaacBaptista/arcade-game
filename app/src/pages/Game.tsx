@@ -22,6 +22,8 @@ export default function Game() {
   const [autoMode, setAutoMode] = useState(false);
   const [autoStatus, setAutoStatus] = useState("Auto parado");
   const [vaultOpen, setVaultOpen] = useState(false);
+  const [buildersOpen, setBuildersOpen] = useState(false);
+  // const [civilsOpen, setCivilsOpen] = useState(false);
   const [heroModalOpen, setHeroModalOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [armoryOpen, setArmoryOpen] = useState(false);
@@ -514,7 +516,15 @@ export default function Game() {
             </button>
           </div>
           <div style={{ marginTop: 12 }}>
-            <Builders builders={builders} onCollect={runCollectBuilders} onHire={runHireBuilders} />
+            <Builders
+            builders={builders}
+            civilians={state.civilians}
+            onCollect={runCollectBuilders}
+            onHire={runHireBuilders}
+            open={buildersOpen}
+            onOpen={() => setBuildersOpen(true)}
+            onClose={() => setBuildersOpen(false)}
+          />
           </div>
           <div className="ks-inline-actions" style={{ marginTop: 12 }}>
             <Vault
@@ -557,6 +567,17 @@ export default function Game() {
         <Log log={log} onClear={runClearLog} />
       </section>
     </div>
+      {buildersOpen && (
+  <Builders
+    builders={builders}
+    civilians={state.civilians}
+    onCollect={runCollectBuilders}
+    onHire={runHireBuilders}
+    open={buildersOpen}
+    onClose={() => setBuildersOpen(false)}
+  />
+)}
+
       {vaultOpen && (
         <VaultModal
           vault={vault}

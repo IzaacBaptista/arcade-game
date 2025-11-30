@@ -500,10 +500,25 @@ class GameEngine {
       }
     });
 
+    // civis especiais
+    const civ = gameState.civilians || {};
+    const farmer = civ.farmer?.qty || 0;
+    const smith = civ.blacksmith?.qty || 0;
+    const engineer = civ.engineer?.qty || 0;
+    const transporter = civ.transporter?.qty || 0;
+
+    totalYield.food += farmer * (18 + gameState.stage * 3);
+    totalYield.wood += farmer * 5;
+    totalYield.iron += smith * (14 + gameState.stage * 2);
+    totalYield.stone += engineer * (12 + gameState.stage * 2);
+    totalYield.wood += engineer * 4;
+    totalYield.energy += transporter * (10 + gameState.stage);
+    totalYield.gold += transporter * 8;
+
     Object.entries(totalYield).forEach(([k, v]) => { gameState.resources[k] += v; });
     gameState.actionLocks.lastBuilderCollectTurn = gameState.turn;
 
-    log.push(`Construtores coletaram +${totalYield.wood} madeira, +${totalYield.gold} ouro, +${totalYield.food} comida, +${totalYield.stone} pedra, +${totalYield.iron} ferro, +${totalYield.energy} energia.`);
+    log.push(`Coleta civil: +${totalYield.wood} madeira, +${totalYield.gold} ouro, +${totalYield.food} comida, +${totalYield.stone} pedra, +${totalYield.iron} ferro, +${totalYield.energy} energia.`);
     if (tired) log.push(`${tired} trabalhador(es) cansados/faltou energia.`);
     if (dead) log.push(`${dead} trabalhador(es) morreram em acidentes.`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
@@ -511,31 +526,53 @@ class GameEngine {
     return { msg: "Coleta de construtores concluída.", state: this.status() };
   }
 
-  hireBuilders(amount = 1) {
+  hireBuilders(type = "builder", amount = 1) {
     const log = [];
     if (!this.ensureOngoing(log)) return { msg: "Partida encerrada.", state: this.status() };
 
-    const costGold = (35 + gameState.stage * 6 + gameState.map * 4 + gameState.builders.qty * 10) * amount;
-    const costFood = (20 + gameState.stage * 5 + gameState.map * 3) * amount;
+    const civ = gameState.civilians || (gameState.civilians = {
+      builder: { qty: gameState.builders?.qty || 0, level: 1 },
+      farmer: { qty: 0, level: 1 },
+      blacksmith: { qty: 0, level: 1 },
+      engineer: { qty: 0, level: 1 },
+      transporter: { qty: 0, level: 1 }
+    });
 
-    if (gameState.resources.gold < costGold || gameState.resources.food < costFood) {
-      const msg = shortageMessage({ gold: costGold, food: costFood });
+    const costs = {
+      builder: { gold: 35 + gameState.stage * 6 + gameState.map * 4 + (civ.builder.qty || 0) * 10, food: 20 + gameState.stage * 5 + gameState.map * 3 },
+      farmer: { gold: 30 + gameState.stage * 5, food: 25 + gameState.stage * 4 },
+      blacksmith: { gold: 40 + gameState.stage * 6, iron: 10 + gameState.map * 3 },
+      engineer: { gold: 45 + gameState.stage * 6, stone: 10 + gameState.map * 3 },
+      transporter: { gold: 30 + gameState.stage * 4, energy: 12 + gameState.map * 2 }
+    };
+
+    const cost = costs[type] || costs.builder;
+    const totalCost = Object.fromEntries(Object.entries(cost).map(([k, v]) => [k, v * amount]));
+
+    const lacks = Object.entries(totalCost).find(([res, val]) => (gameState.resources[res] ?? 0) < val);
+    if (lacks) {
+      const msg = shortageMessage(totalCost as any);
       log.push(msg);
       gameState.log = [...log, ...gameState.log].slice(0, 10);
       return { msg, state: this.status() };
     }
 
-    gameState.resources.gold -= costGold;
-    gameState.resources.food -= costFood;
-    gameState.builders.qty += amount;
-    // aumenta população quando contrata
+    Object.entries(totalCost).forEach(([k, v]) => gameState.resources[k] -= v);
     gameState.resources.population = (gameState.resources.population || 0) + amount;
-    this.ensureWorkersCount();
 
-    log.push(`Contratou ${amount} construtor(es). (custo ${costGold} ouro / ${costFood} comida)`);
+    if (type === "builder") {
+      gameState.builders.qty += amount;
+      civ.builder.qty = gameState.builders.qty;
+      this.ensureWorkersCount();
+    } else {
+      civ[type] = civ[type] || { qty: 0, level: 1 };
+      civ[type].qty += amount;
+    }
+
+    log.push(`Contratou ${amount} ${type}(s).`);
     gameState.log = [...log, ...gameState.log].slice(0, 10);
 
-    return { msg: "Construtores contratados.", state: this.status() };
+    return { msg: "Civis contratados.", state: this.status() };
   }
 
   upgradeTroops(type) {
