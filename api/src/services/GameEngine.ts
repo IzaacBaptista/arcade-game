@@ -62,7 +62,7 @@ class GameEngine {
       fresh.vault = JSON.parse(JSON.stringify(gameState.vault || initialState.vault));
       // garante poções e joias mínimas
       fresh.vault.jewels = fresh.vault.jewels ?? 0;
-      fresh.vault.potions = fresh.vault.potions || { heal: 0, energy: 0, loot: 0 };
+      fresh.vault.potions = fresh.vault.potions || { heal: 0, energy: 0, loot: 0, confuse: 0 };
     }
     // desbloqueia a fera gigante a partir do mapa 2
     if (fresh.map >= 2) {
@@ -821,6 +821,9 @@ class GameEngine {
       gameState.resources.gold += gold;
       gameState.resources.wood += wood;
       log.push(`Poção de saque: +${gold} ouro, +${wood} madeira.`);
+    } else if (type === "confuse") {
+      gameState.effects.confuseTurns = 2;
+      log.push("Poção de confusão: inimigos desorientados por 2 turnos.");
     }
 
     gameState.vault.potions = potions;
@@ -940,6 +943,7 @@ class GameEngine {
     ["ringPowerTurns", "bookTurns", "armorTurns", "hasteTurns"].forEach(k => {
       if (gameState.effects[k] && gameState.effects[k] > 0) gameState.effects[k] -= 1;
     });
+    if (gameState.effects.confuseTurns > 0) gameState.effects.confuseTurns -= 1;
     rare.forEach(r => { if (r.activeTurns && r.activeTurns > 0) r.activeTurns -= 1; });
 
     if (gameState.hero && gameState.hero.cooldown > 0) {
@@ -1089,6 +1093,23 @@ class GameEngine {
 
     for (const enemy of gameState.enemies) {
       let enemyAttack = enemy.attack * slowFactor * hasteDebuff * this.difficultyMod().damageTaken;
+      if (gameState.effects.confuseTurns > 0) {
+        enemyAttack = Math.round(enemyAttack * 0.75);
+        if (Math.random() < 0.15 && gameState.enemies.length > 1) {
+          const other = gameState.enemies.find(e => e.id !== enemy.id);
+          if (other) {
+            const friendlyFire = Math.round(enemyAttack * 0.6);
+            other.hp -= friendlyFire;
+            log.push(`${enemy.name} está confuso e atingiu ${other.name} em ${friendlyFire}!`);
+            if (other.hp <= 0) {
+              log.push(`${other.name} caiu pela confusão!`);
+              this.grantEnemyRewards(other, log);
+              gameState.enemies = gameState.enemies.filter(e => e.id !== other.id);
+            }
+            continue;
+          }
+        }
+      }
       if (enemy.boss) enemyAttack *= 1.1;
       if (gameState.effects.enemyWeakTurns > 0) {
         enemyAttack = Math.round(enemyAttack * 0.7);

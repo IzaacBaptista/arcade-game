@@ -3,6 +3,7 @@ const potionData = [
   { key: "heal", label: "Poção de cura", icon: "🧪", desc: "+HP no castelo" },
   { key: "energy", label: "Poção de energia", icon: "⚡", desc: "+Energia" },
   { key: "loot", label: "Poção de saque", icon: "💰", desc: "+Ouro e madeira" },
+  { key: "confuse", label: "Poção de confusão", icon: "🤯", desc: "Inimigos confundidos 2 turnos" },
 ];
 
 const rareData = [
