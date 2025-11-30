@@ -18,12 +18,37 @@ export default function BattlefieldTroops({ troops, armory }) {
     <div className="ks-battlefield-troops">
       {/* Exibe tropas */}
       {Object.entries(troops || {}).map(([type, troop]) => {
-        if (troop.qty <= 0) return null;
-        
-        const icon = type === "soldiers" ? "⚔️" : type === "archers" ? "🏹" : "🛡️";
-        
+        if (!troop || troop.qty <= 0) return null;
+        const icons = {
+          soldiers: "⚔️",
+          archers: "🏹",
+          cavalry: "🐎",
+          lancers: "🛡️",
+          spearmen: "🛡️",
+          mages: "✨",
+          assassins: "🗡️",
+          berserkers: "💢",
+          giants: "🪨",
+          elephants: "🐘",
+          imps: "😈"
+        };
+        const labels = {
+          soldiers: "Soldados",
+          archers: "Arqueiros",
+          cavalry: "Cavalaria",
+          lancers: "Lanceiros",
+          spearmen: "Lanceiros",
+          mages: "Magos",
+          assassins: "Assassinos",
+          berserkers: "Berserkers",
+          giants: "Gigantes",
+          elephants: "Elefantes",
+          imps: "Diabretes"
+        };
+        const icon = icons[type] || "🎖️";
+        const label = labels[type] || type;
         return (
-          <div key={type} className="ks-troop-unit" title={`${troop.qty} ${type} (ATK ${troop.attack})`}>
+          <div key={type} className="ks-troop-unit" title={`${troop.qty} ${label} (ATK ${troop.attack})`}>
             <span className="ks-troop-icon">{icon}</span>
             <span className="ks-troop-count">{troop.qty}</span>
           </div>
@@ -32,7 +57,7 @@ export default function BattlefieldTroops({ troops, armory }) {
 
       {/* Exibe armamento */}
       {Object.entries(armory || {}).map(([type, item]) => {
-        if (item.qty <= 0) return null;
+        if (!item || item.qty <= 0) return null;
         
         const icons = {
           catapults: "🎯",

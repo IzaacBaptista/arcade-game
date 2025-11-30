@@ -3,7 +3,7 @@ export default function Towers({ towers, onUpgrade }) {
   return (
     <div className="ks-card-grid">
       {towers.map(t => (
-        <div key={t.id} className="ks-card tower-card">
+        <div key={t.id} className="ks-card tower-card" style={{ maxWidth: 240 }}>
           <div className="ks-card-head">
             <span className="ks-icon-circle">🏹</span>
             <div>
